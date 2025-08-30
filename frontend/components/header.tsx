@@ -1,5 +1,5 @@
 
-
+"use client";
 import {
   Navbar,
   NavBody,
@@ -14,12 +14,20 @@ import {
 import { useState } from "react";
 import { navItems } from "@/data/data";
 
-export default function Header() {
+
+interface HeaderProps {
+    // Add any props if needed in the future
+    className?: string;
+}
+
+
+
+export default function Header({ className }: HeaderProps) {
     
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     return (
-        <div className="relative w-full mt-1">
+        <div className={`relative w-full mt-1 ${className ?? ""}`}>
             <Navbar>
             {/* Desktop Navigation */}
             <NavBody>

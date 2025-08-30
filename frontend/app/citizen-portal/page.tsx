@@ -1,54 +1,41 @@
 "use client"
 
-import DotGrid from "@/components/blocks/Backgrounds/DotGrid/DotGrid";
-
-
-
 
 import { Issue } from "@/components/issue";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
+import Pattern from "@/components/pattern";
 
 
 export default function CitizenPortal() {
   
-  
-  
   return (
-    <div className="fixed w-full h-screen">
-      <DotGrid
-        dotSize={5}
-        gap={15}
-        baseColor="#271E37"
-        activeColor="#5227FF"
-        proximity={120}
-        shockRadius={250}
-        shockStrength={5}
-        resistance={750}
-        returnDuration={1.5}
-        style={{padding:0}}
-      />
-      <div className="flex absolute inset-0 flex-col">
-        {/* Navbar */}
-        <Header />
+    
+    <div className="relative flex flex-col mt-16">
+      <Pattern />
+      <Card className="flex flex-row justify-between mx-5 p-0 items-center">
+        <Label className="m-5 text-lg font-semibold">Total Issues (count) </Label>
+        <Button className="m-5">Report an issue</Button>
+       
+      </Card>
+      <div className="flex flex-col mx-5 gap-5 my-5">
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
+        <Issue />
         
-  
- 
-
-        {/* <nav className="w-full h-14 bg-white m-2"></nav> */}
-       
-          <div className="flex justify-center items-center h-full mx-auto min-w-[70%]">
-            <Issue />
-
-          </div>
-       
-  
       </div>
 
-    
-      {/* Footer */}
-      <Footer />
-      
     </div>
+    
   )
 }

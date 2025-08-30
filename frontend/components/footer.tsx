@@ -5,15 +5,20 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ui/mode_toggle";
+import { ModeToggle } from "@/components/mode_toggle";
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react";
 
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
+interface FooterProps extends React.HTMLAttributes<HTMLElement> {
+    className?: string;
+}
 
-export default function Header() {
+
+
+export default function Footer({className}: FooterProps) {
     const Icons = {
         calendar: (props: IconProps) => <CalendarIcon {...props} />,
         email: (props: IconProps) => <MailIcon {...props} />,
@@ -90,7 +95,7 @@ export default function Header() {
         };
 
     return (
-        <footer className="absolute bottom-4 w-full flex justify-center">
+        <footer className={`relative bottom-0 w-full flex justify-center mt-5 ${className ?? ""}`}>
       <TooltipProvider>
         <Dock direction="middle">
             {DATA.navbar.map((item) => (

@@ -5,6 +5,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "next-themes";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import DotGrid from "@/components/blocks/Backgrounds/DotGrid/DotGrid";
+
 
 
 const geistSans = Geist({
@@ -32,12 +36,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Header className="mt-2" />
         <ThemeProvider attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange >
+              
           {children}
+          
         </ThemeProvider>
+        <Footer className=""/>
+        
       </body>
     </html>
   );

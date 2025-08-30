@@ -25,7 +25,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 
-export function Issue() {
+
+interface IssueProps extends React.HTMLAttributes<HTMLDivElement> {
+    className?: string;
+}
+
+export function Issue({className}: IssueProps) {
     const desc = (
         <>
       Enter your email below to login to your account<br />
@@ -34,7 +39,7 @@ export function Issue() {
     </>
     );
   return (
-    <Card className="max-w-sm w-full min-w-full gap-2 py-0">
+    <Card className={`max-w-sm w-full min-w-full gap-2 py-0 ${className ?? ""}`}>
       <CardHeader className="space-x-3 flex flex-row items-center pt-4">
         <div className="relative top-[-97px] sm:top-[-53px]">
             <Avatar>
