@@ -95,7 +95,7 @@ export default function Footer({className}: FooterProps) {
         };
 
     return (
-        <footer className={`relative bottom-0 w-full flex justify-center mt-5 ${className ?? ""}`}>
+        <footer className={`relative mb-2 bottom-0 w-full flex justify-center mt-5 ${className ?? ""}`}>
       <TooltipProvider>
         <Dock direction="middle">
             {DATA.navbar.map((item) => (

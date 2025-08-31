@@ -9,6 +9,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import DotGrid from "@/components/blocks/Backgrounds/DotGrid/DotGrid";
 import { usePathname } from "next/navigation";
+import 'leaflet/dist/leaflet.css';
 
 
 const geistSans = Geist({

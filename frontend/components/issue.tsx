@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import InProgressBadge from "@/components/ui/pending_badge"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { ArrowDown, ArrowUp, MapPin } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import {
   Drawer,
@@ -24,6 +24,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 
 interface IssueProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -58,11 +60,20 @@ export function Issue({className}: IssueProps) {
 
             <Drawer>
                 <DrawerTrigger asChild>
-                    <Button variant={"link"} className="p-0 w-max">View Images</Button>
+                    <Button variant={"link"} className="p-0 w-max">View Details</Button>
                 </DrawerTrigger>
                 <DrawerContent>
-                    <DrawerHeader>
-                    <DrawerTitle>Issue Title</DrawerTitle>
+                    <DrawerHeader className="flex flex-col gap-2 items-start">
+                      <div className="flex flex-row justify-between w-full items-center">
+                        <DrawerTitle>Issue Title</DrawerTitle>
+                        <div className="flex flex-row items-center gap-2">
+                          <InProgressBadge />
+                          <Link href="https://maps.google.com" target="_blank" rel="noopener noreferrer">
+                            <Badge variant="outline" className="mr-2"><MapPin className="mr-2" />Open in Maps</Badge>
+                          </Link>
+                          
+                        </div>
+                      </div>
                     <DrawerDescription>
                         {desc}
                     </DrawerDescription>
