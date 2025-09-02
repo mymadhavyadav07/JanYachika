@@ -1,3 +1,5 @@
+"use client"
+
 import { Shield, Key, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -7,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Badge } from "@/components/ui/badge";
 
-export default function ProfileContent() {
+export default function ProfileContent({ profile, loading, handleChange }: { profile: any, loading: boolean, handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void }) {
   return (
     <Tabs defaultValue="personal" className="space-y-6">
       <TabsList className="grid w-full grid-cols-3">
@@ -30,11 +32,21 @@ export default function ProfileContent() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="John" />
+                <Input id="firstName"
+                placeholder="Enter First Name" 
+                value={profile?.firstName || ""}
+          
+                onChange={handleChange}
+                disabled={loading} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Doe" />
+                <Input 
+                id="lastName"
+                placeholder="Enter Last Name"
+                value={profile?.lastName || ""}
+                onChange={handleChange}
+                disabled={loading} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -42,29 +54,32 @@ export default function ProfileContent() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" defaultValue="+1 (555) 123-4567" />
+                <Input 
+                id="phone" 
+                placeholder="Enter Phone Number"
+                value={profile.phone}
+                onChange={handleChange}
+                disabled={loading} 
+                />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="jobTitle">Job Title</Label>
                 <Input id="jobTitle" defaultValue="Senior Product Designer" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
                 <Input id="company" defaultValue="Acme Inc." />
-              </div>
+              </div> */}
             </div>
-            {/* <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                placeholder="Tell us about yourself..."
-                defaultValue="Passionate product designer with 8+ years of experience creating user-centered digital experiences. I love solving complex problems and turning ideas into beautiful, functional products."
-                rows={4}
-              />
-            </div> */}
+            
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" defaultValue="San Francisco, CA" />
+              <Label htmlFor="location">Address</Label>
+              <Input 
+              id="location" 
+              placeholder="Enter your address"
+              value={profile.location}
+              onChange={handleChange}
+              disabled={loading} />
             </div>
           </CardContent>
         </Card>
