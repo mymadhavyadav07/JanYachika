@@ -17,7 +17,13 @@ import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 
 export default function CitizenPortal() {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
   
+  useEffect(() => {
+        setIsMounted(true);
+    }, []);
+  
+
   return (
     
     <section style={{position: 'relative', overflow: 'hidden'}}>
@@ -37,7 +43,7 @@ export default function CitizenPortal() {
           textAlign="center"
           // onLetterAnimationComplete={handleAnimationComplete}
         />
-        <Label className="m-5 text-lg font-normal text-gray-300">A platform for reporting civic issues and get them resolved by the respective authorities.</Label>
+        <Label className="m-5 text-lg font-normal dark:text-gray-300 text-gray-600">A platform for reporting civic issues and get them resolved by the respective authorities.</Label>
         <div className="flex flex-row gap-5">
           <Button variant={"outline"} onClick={() => {router.push("/profile")}}>My Reports</Button>
           <Button onClick={() => {router.push("/report-issue")}}>Report an issue</Button>
@@ -45,7 +51,7 @@ export default function CitizenPortal() {
        
       </div>
 
-        <Card className="flex flex-col mx-5 gap-5 my-5 justify-center items-center" 
+        <Card className="flex flex-col mx-5 gap-5 my-5 justify-center items-center mb-20" 
           style={{background: "transparent",
           backdropFilter: "blur(5px)",
           WebkitBackdropFilter: "blur(5px)",

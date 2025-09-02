@@ -14,12 +14,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
+import { useEffect } from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const [isMounted, setIsMounted] = useState(false);
   const [show, setShow] = useState(false);
+  const [role, setRole] = useState<string>("");
+
+  useEffect(() => {
+          setIsMounted(true);
+          }, []);
 
   return (
     // <Card className="mx-auto w-full max-w-md shadow-lg">
@@ -32,10 +39,28 @@ export function LoginForm({
       </div>
 
       <div className="grid gap-6">
+        {/* States */}
+        <div className="grid gap-3">
+          <Label htmlFor="state">State</Label>
+          <Select name="state" required>
+            <SelectTrigger className="w-full" id="state">
+              <SelectValue placeholder="Select state" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="citizen">Uttar Pradesh</SelectItem>
+              <SelectItem value="admin">Delhi</SelectItem>
+              <SelectItem value="officer">Madhya Pradesh</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Role */}
         <div className="grid gap-3">
           <Label htmlFor="role">Role</Label>
-          <Select name="role" required>
+          <Select name="role"
+          value={role} 
+          onValueChange={(value) => setRole(value)}
+          required >
             <SelectTrigger className="w-full" id="role">
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
@@ -48,6 +73,7 @@ export function LoginForm({
         </div>
 
         {/* Department */}
+        {(role === "admin" || role === "officer") && (
         <div className="grid gap-3">
           <Label htmlFor="department">Department</Label>
           <Select name="department" required>
@@ -62,6 +88,7 @@ export function LoginForm({
             </SelectContent>
           </Select>
         </div>
+        )}
 
         {/* Email */}
         <div className="grid gap-3">
@@ -74,7 +101,7 @@ export function LoginForm({
           <div className="flex items-center">
             <Label htmlFor="password">Password</Label>
             <a
-              href="#"
+              href="/forgot-password"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?

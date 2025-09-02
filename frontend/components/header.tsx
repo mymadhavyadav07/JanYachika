@@ -30,9 +30,9 @@ export default function Header({ className }: HeaderProps) {
 
   useEffect(() => {
         setIsMounted(true);
-        }, []);
+    }, []);
 
-        
+
   return (
         <div className={`relative w-full mt-1 ${className ?? ""}`}>
             <Navbar>

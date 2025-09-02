@@ -1,6 +1,8 @@
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { SignupForm } from "@/components/signup-form"
+import image from "@/public/citizens.jpg"
+import Image from "next/image"
 
 export default function LoginPage() {
     const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
@@ -12,6 +14,7 @@ export default function LoginPage() {
             <a href="/" className="flex items-center gap-2 font-medium">
                 <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
                 <GalleryVerticalEnd className="size-4" />
+                
                 </div>
                 { projectName }
             </a>
@@ -24,9 +27,9 @@ export default function LoginPage() {
         </div>
         <div className="bg-muted relative hidden lg:block">
             <img
-            src="/placeholder.svg"
+            src={image.src}
             alt="Image"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4]"
             />
         </div>
         </div>

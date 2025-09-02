@@ -9,6 +9,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { usePathname } from "next/navigation";
 import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
+import { useEffect, useState } from "react";
 
 import 'leaflet/dist/leaflet.css';
 
@@ -35,7 +36,13 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname();
   const loginPortal = pathname === "/login" || pathname === "/register";
-  console.log("pathname", pathname);
+  const [isMounted, setIsMounted] = useState(false);
+  
+    useEffect(() => {
+          setIsMounted(true);
+      }, []);
+  
+  // console.log("pathname", pathname);
 
   return (
     <html lang="en" suppressHydrationWarning>

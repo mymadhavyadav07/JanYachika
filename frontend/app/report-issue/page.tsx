@@ -44,7 +44,7 @@ export default function CitizenPortal() {
 
   return (
     
-    <div className="relative flex flex-col mt-16">
+    <div className="relative flex flex-col mt-16 mb-20">
     
       <div className="flex flex-row justify-center mx-5 p-0 items-center">
         {/* <Label className="m-5 text-lg font-semibold">Total Issues (count) </Label>

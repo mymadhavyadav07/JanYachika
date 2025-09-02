@@ -1,6 +1,7 @@
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { LoginForm } from "@/components/login-form"
+import image from "@/public/citizens.jpg"
 
 export default function LoginPage() {
   const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
@@ -24,9 +25,9 @@ export default function LoginPage() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <img
-          src="/placeholder.svg"
+          src={image.src}
           alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4]"
         />
       </div>
     </div>
