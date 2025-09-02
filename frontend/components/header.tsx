@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { useState } from "react";
 import { navItems } from "@/data/data";
-
+import { useEffect } from "react";
 
 interface HeaderProps {
     // Add any props if needed in the future
@@ -26,7 +26,14 @@ export default function Header({ className }: HeaderProps) {
     
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    return (
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+        setIsMounted(true);
+        }, []);
+
+        
+  return (
         <div className={`relative w-full mt-1 ${className ?? ""}`}>
             <Navbar>
             {/* Desktop Navigation */}
@@ -34,7 +41,7 @@ export default function Header({ className }: HeaderProps) {
                 <NavbarLogo />
                 <NavItems items={navItems} />
                 <div className="flex items-center gap-4">
-                <NavbarButton variant="secondary">Login</NavbarButton>
+                <NavbarButton variant="secondary" href="/login">Login</NavbarButton>
                 <NavbarButton variant="primary">Book a call</NavbarButton>
                 </div>
             </NavBody>

@@ -38,11 +38,10 @@ export default function CitizenPortal() {
   const handleSubmit = () => {
   console.log("lol");
   console.log(location);
-  // Add your submit logic here
+
     };
 
- 
-  
+
   return (
     
     <div className="relative flex flex-col mt-16">
@@ -51,7 +50,7 @@ export default function CitizenPortal() {
         {/* <Label className="m-5 text-lg font-semibold">Total Issues (count) </Label>
         <Button className="m-5" onClick={() => {router.push("/report-issue")}}>Report an issue</Button> */}
         <BlurText
-            text="Report Issues and We will fix them!"
+            text="Report Issues and We will get them fixed!"
             delay={250}
             animateBy="words"
             direction="top"

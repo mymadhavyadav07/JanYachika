@@ -106,24 +106,24 @@ export default function OSMLocationPicker({ onLocationSelect }: Props) {
 
   return (
     <div className="relative w-full h-[600px]">
+      
       <MapContainer
   center={[55, 55]}
   zoom={18}
   maxZoom={22}
   style={{ height: '100%', width: '100%' }}
 >
+  <SearchBar onResult={handleSearchResult} />
+
   <LayersControl position="topright">
-    {/* Hybrid (Satellite + Labels) */}
     <LayersControl.BaseLayer checked name="Hybrid (Esri)">
       <>
-        {/* Satellite imagery */}
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           attribution="Tiles © Esri"
           maxZoom={23}
         />
 
-        {/* Roads and labels overlay - transparent */}
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
           attribution="Labels © Esri"
@@ -139,7 +139,7 @@ export default function OSMLocationPicker({ onLocationSelect }: Props) {
       </>
     </LayersControl.BaseLayer>
 
-    {/* Optional: Plain OpenStreetMap */}
+ 
     <LayersControl.BaseLayer name="OpenStreetMap">
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -149,7 +149,7 @@ export default function OSMLocationPicker({ onLocationSelect }: Props) {
     </LayersControl.BaseLayer>
   </LayersControl>
 
-  {/* Your handlers */}
+
   <ClickHandler />
   <LocationMarker position={markerPosition} />
 </MapContainer>

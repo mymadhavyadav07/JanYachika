@@ -9,12 +9,12 @@ export const navItems = [
         link: "#features",
       },
       {
-        name: "Pricing",
-        link: "#pricing",
+        name: "About Us",
+        link: "#team",
       },
       {
-        name: "Contact",
-        link: "#contact",
+        name: "Map View",
+        link: "#map-view",
       },
 ];
 

@@ -7,8 +7,9 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import DotGrid from "@/components/blocks/Backgrounds/DotGrid/DotGrid";
 import { usePathname } from "next/navigation";
+import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
+
 import 'leaflet/dist/leaflet.css';
 
 
@@ -38,19 +39,37 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         {!loginPortal && <Header className="mt-2" />}
+        
         <ThemeProvider attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange >
-              
-          {children}
+
+          <div className="fixed inset-0 -z-10 w-full min-h-screen">
+             <Particles
+    particleColors={['#dc2626', '#f97316']}
+    particleCount={200}
+    particleSpread={10}
+    speed={0.1}
+    particleBaseSize={100}
+    moveParticlesOnHover={true}
+    alphaParticles={false}
+    disableRotation={false}
+  />
+          </div>
+
+          <div style={{ position: 'relative', minHeight: '100vh' }}>
+            <main className="min-h-screen">{children}</main>
+          </div>
           
-        </ThemeProvider>
+        
         {!loginPortal && <Footer className=""/>}
+        </ThemeProvider>
         
       </body>
     </html>

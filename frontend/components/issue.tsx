@@ -41,7 +41,7 @@ export function Issue({className}: IssueProps) {
     </>
     );
   return (
-    <Card className={`max-w-sm w-full min-w-full gap-2 py-0 ${className ?? ""}`}>
+    <Card className={`max-w-sm w-[85%] min-w-[85%] gap-2 py-0 ${className ?? ""}`}>
       <CardHeader className="space-x-3 flex flex-row items-center pt-4">
         <div className="relative top-[-97px] sm:top-[-53px]">
             <Avatar>
