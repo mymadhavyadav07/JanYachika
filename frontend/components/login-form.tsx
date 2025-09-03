@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect } from "react";
+import { apiBaseUrl } from "@/data/data";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -23,11 +25,78 @@ export function LoginForm({
   const [isMounted, setIsMounted] = useState(false);
   const [show, setShow] = useState(false);
   const [role, setRole] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [pass, setPass] = useState<string>("");
+  const [dept, setDept] = useState<string>("");
+  
+  
 
   useEffect(() => {
           setIsMounted(true);
           }, []);
 
+
+  const handleSubmit = async() => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          state: state,
+          role: role,
+          email: email,
+          passwrd: pass,
+        }),
+      });
+
+      if (response.status === 401) {
+        toast("❌ Unauthorized!", {
+          description: "Invalid credentials. Please try again.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        toast("❌ Login failed!", {
+          description: "Something went wrong.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+        return;
+      }
+
+      const result = await response.json();
+      toast("Login Successful", {
+        description: "Please wait while for a while...",
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+
+
+      // ...handle successful login...
+
+    } catch (error) {
+      console.log(error);
+      toast("❌ Failed to send mail!", {
+        description: "Please check your internet connection.",
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    }
+  }
   return (
     // <Card className="mx-auto w-full max-w-md shadow-lg">
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -42,14 +111,16 @@ export function LoginForm({
         {/* States */}
         <div className="grid gap-3">
           <Label htmlFor="state">State</Label>
-          <Select name="state" required>
+          <Select name="state" value={state} 
+           onValueChange={(value) => setState(value)} 
+           required >
             <SelectTrigger className="w-full" id="state">
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="citizen">Uttar Pradesh</SelectItem>
-              <SelectItem value="admin">Delhi</SelectItem>
-              <SelectItem value="officer">Madhya Pradesh</SelectItem>
+              <SelectItem value="Uttar Pradesh">Uttar Pradesh</SelectItem>
+              <SelectItem value="Delhi">Delhi</SelectItem>
+              <SelectItem value="Madhya Pradesh">Madhya Pradesh</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -76,7 +147,9 @@ export function LoginForm({
         {(role === "admin" || role === "officer") && (
         <div className="grid gap-3">
           <Label htmlFor="department">Department</Label>
-          <Select name="department" required>
+          <Select name="department" value={dept} 
+           onValueChange={(value) => setDept(value)} 
+           required >
             <SelectTrigger className="w-full" id="department">
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
@@ -93,7 +166,8 @@ export function LoginForm({
         {/* Email */}
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input id="email" type="email" placeholder="m@example.com" value={email} 
+          onChange={(e) => setEmail(e.target.value)} required />
         </div>
 
         {/* Password */}
@@ -112,6 +186,8 @@ export function LoginForm({
               className="pr-10"
               id="password"
               type={show ? "text" : "password"}
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
               required
             />
             <Button
@@ -131,7 +207,7 @@ export function LoginForm({
         </div>
 
         {/* Submit */}
-        <Button type="submit" className="w-full">
+        <Button type="button" onClick={handleSubmit} className="w-full">
           Login
         </Button>
 

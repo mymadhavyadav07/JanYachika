@@ -16,8 +16,17 @@ import { Textarea } from "@/components/ui/textarea";
 import BlurText from "@/components/blocks/TextAnimations/BlurText/BlurText";
 
 import LocationPicker from "@/components/LocationPicker";
+import { withAuth } from '@/lib/auth';
 
 
+
+
+// Auth logic
+// export const getServerSideProps = withAuth;
+
+// export default function Profile({ user }: { user: any }) {
+//   return <div>Profile: {user.user}</div>;
+// }
 
 
 

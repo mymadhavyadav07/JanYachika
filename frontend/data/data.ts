@@ -1,7 +1,7 @@
 
 
 export const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
-export const mapsAPI = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const navItems = [
       {

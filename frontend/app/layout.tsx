@@ -10,6 +10,7 @@ import Footer from "@/components/footer";
 import { usePathname } from "next/navigation";
 import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 
 import 'leaflet/dist/leaflet.css';
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const loginPortal = pathname === "/login" || pathname === "/register";
+  const loginPortal = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
   const [isMounted, setIsMounted] = useState(false);
   
     useEffect(() => {
@@ -72,6 +73,7 @@ export default function RootLayout({
 
           <div style={{ position: 'relative', minHeight: '100vh' }}>
             <main className="min-h-screen">{children}</main>
+            <Toaster />
           </div>
           
         
