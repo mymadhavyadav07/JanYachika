@@ -43,8 +43,6 @@ export default function RootLayout({
           setIsMounted(true);
       }, []);
   
-  // console.log("pathname", pathname);
-
   return (
     <html lang="en" suppressHydrationWarning>
       

@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
 
-import { Issue } from "@/components/issue";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,45 +13,52 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 import BlurText from "@/components/blocks/TextAnimations/BlurText/BlurText";
-
-import LocationPicker from "@/components/LocationPicker";
-import { withAuth } from '@/lib/auth';
+import dynamic from "next/dynamic";
 
 
 
 
-// Auth logic
-// export const getServerSideProps = withAuth;
-
-// export default function Profile({ user }: { user: any }) {
-//   return <div>Profile: {user.user}</div>;
-// }
-
-
+const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false });
 
 export default function CitizenPortal() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-//   const [location, setLocation] = useState("");
   const [pictures, setPictures] = useState<FileList | null>(null);
-
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
+ 
 
-//   const handleLocationSelect = (lat: number, lng: number) => {
-//     setLocation({ lat, lng });
-//     console.log(location);
-//   };
+  useEffect(() => {
+    const cookieString = document.cookie;
+    const hasAuthToken = cookieString
+      .split('; ')
+      .some(cookie => cookie.startsWith('auth_token='));
 
+    if (!hasAuthToken) {
+      router.replace('/login');
+    } else {
+      setIsChecking(false);
+    }
+  }, [router]);
+
+  if (isChecking) {
+    return null; // Or a loader if you prefer
+  }
+
+
+
+  
   const handleSubmit = () => {
-  console.log("lol");
-  console.log(location);
+    console.log("lol");
+    console.log(location);
 
     };
-
+    
+    
 
   return (
-    
+   
     <div className="relative flex flex-col mt-16 mb-20">
     
       <div className="flex flex-row justify-center mx-5 p-0 items-center">

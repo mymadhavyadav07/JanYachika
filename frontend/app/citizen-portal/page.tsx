@@ -18,10 +18,12 @@ import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 export default function CitizenPortal() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  
+
   useEffect(() => {
         setIsMounted(true);
     }, []);
+
+
   
 
   return (

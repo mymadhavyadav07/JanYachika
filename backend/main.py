@@ -45,8 +45,7 @@ def login(user: UserLogin, response: Response):
         
         if user.dept != db_user.get("dept"):
             raise HTTPException(status_code=401, detail="Invalid information")
-
-    
+        
 
     token = create_access_token({"sub": db_user["email"], 
                                  "role": db_user['role']}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -54,7 +53,7 @@ def login(user: UserLogin, response: Response):
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=None,
         samesite="Lax",
         max_age=60 * 60 * 24
     )

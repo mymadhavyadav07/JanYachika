@@ -17,11 +17,13 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect } from "react";
 import { apiBaseUrl } from "@/data/data";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [show, setShow] = useState(false);
   const [role, setRole] = useState<string>("");
@@ -44,11 +46,14 @@ export function LoginForm({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
+        
         body: JSON.stringify({
           state: state,
+          dept: dept,
           role: role,
           email: email,
-          passwrd: pass,
+          password: pass,
         }),
       });
 
@@ -75,6 +80,8 @@ export function LoginForm({
       }
 
       const result = await response.json();
+      router.push("/citizen-portal");
+      
       toast("Login Successful", {
         description: "Please wait while for a while...",
         action: {
@@ -82,6 +89,7 @@ export function LoginForm({
           onClick: () => {},
         },
       });
+      
 
 
       // ...handle successful login...
@@ -238,6 +246,6 @@ export function LoginForm({
       </div>
     </form>
 
-    // </Card>
+  
   );
 }

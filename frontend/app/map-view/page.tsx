@@ -1,11 +1,11 @@
 "use client"
 
-import HeatmapMap from "@/components/HeatMap";
+import dynamic from 'next/dynamic';
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
-import { Search } from "lucide-react";
+
+
+const HeatmapMap = dynamic(() => import('@/components/HeatMap'), { ssr: false });
 
 export default function MapView() {
     const coords: [number, number, number][] = [

@@ -14,7 +14,7 @@ export async function withAuth<T>(
 ): Promise<GetServerSidePropsResult<T>> {
   const { req } = context;
 
-  const res = await fetch(`${apiBaseUrl}/user`, {
+  const res = await fetch(`${apiBaseUrl}/me`, {
     headers: {
       cookie: req.headers.cookie || '',
     },

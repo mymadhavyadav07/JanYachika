@@ -8,17 +8,29 @@ import { buttonVariants } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode_toggle";
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react";
+import { getCurrentUser, User } from "@/lib/getCurrentUser";
+import { useState, useEffect } from "react";
 
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
+
 
 interface FooterProps extends React.HTMLAttributes<HTMLElement> {
     className?: string;
 }
 
 
-
 export default function Footer({className}: FooterProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      setUser(user);
+      setLoading(false);
+    });
+  }, []);
+
     const Icons = {
         calendar: (props: IconProps) => <CalendarIcon {...props} />,
         email: (props: IconProps) => <MailIcon {...props} />,

@@ -26,6 +26,7 @@ import {
 
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { apiBaseUrl } from "@/data/data";
 
 
 
@@ -57,7 +58,7 @@ export function ForgetPassForm({
     }
     
     try {
-        const response = await fetch("http://localhost:8000/send-otp", {
+        const response = await fetch(`${apiBaseUrl}/send-otp`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
