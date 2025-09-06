@@ -19,6 +19,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     fname: str
     lname: str
+    dept: str
     passwrd: str
     role: str
     state: str

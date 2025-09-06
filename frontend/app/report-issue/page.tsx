@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import BlurText from "@/components/blocks/TextAnimations/BlurText/BlurText";
 import dynamic from "next/dynamic";
+import { apiBaseUrl } from "@/data/data";
 
 
 
@@ -27,27 +28,44 @@ export default function CitizenPortal() {
   const [pictures, setPictures] = useState<FileList | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isChecking, setIsChecking] = useState(true);
- 
+  const [isMounted, setIsMounted] = useState(false);
+  
+   
 
   useEffect(() => {
-    const cookieString = document.cookie;
-    const hasAuthToken = cookieString
-      .split('; ')
-      .some(cookie => cookie.startsWith('auth_token='));
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
 
-    if (!hasAuthToken) {
-      router.replace('/login');
-    } else {
-      setIsChecking(false);
-    }
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          router.replace("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        router.replace("/login");
+      }
+    };
+
+    fetchData();
   }, [router]);
 
-  if (isChecking) {
-    return null; // Or a loader if you prefer
+
+  if (!isMounted){
+    return null
   }
-
-
-
   
   const handleSubmit = () => {
     console.log("lol");
@@ -81,9 +99,9 @@ export default function CitizenPortal() {
         <Label className="mx-5 mb-4 text-sm text-gray-400">Help the system improve by reporting civic issues encountered by you.</Label>
         <Separator />
         <form className="flex flex-col mx-5 gap-2 mt-4" onSubmit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}>
+          e.preventDefault();
+          handleSubmit();
+        }}>
             
             <Label className="mb-1 block text-sm font-medium">Title</Label>
             <Input

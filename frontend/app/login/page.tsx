@@ -3,6 +3,8 @@ import { GalleryVerticalEnd } from "lucide-react"
 import { LoginForm } from "@/components/login-form"
 import image from "@/public/citizens.jpg"
 
+
+
 export default function LoginPage() {
   const projectName = process.env.NEXT_PUBLIC_PROJECT_NAME;
 

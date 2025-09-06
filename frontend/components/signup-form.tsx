@@ -51,17 +51,35 @@ export function SignupForm({
             lname: lname,
             email: email,
             state: state,
+            dept: dept,
             role: role,
             passwrd: pass
         }),
         });
+        
+        if (response.status === 409) {
+          toast("⚠️ User already exists!", {
+            description: "An account with this email already exists.",
+            action: {
+              label: "Close",
+              onClick: () => {},
+            },
+          });
+          return; 
+        }
 
         if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
         }
 
         const result = await response.json();
-        console.log("Email sent successfully:", result);
+        toast("User created successfully!", {
+        description: "You can now login with the same information.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+      })
 
   
     } catch (error) {
@@ -77,6 +95,8 @@ export function SignupForm({
   }
 
 
+
+  
   return (
     // <Card className="mx-auto w-full max-w-md shadow-lg">
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -130,8 +150,8 @@ export function SignupForm({
         {(role === "admin" || role === "officer") && (
         <div className="grid gap-3">
           <Label htmlFor="department">Department</Label>
-          <Select name="department" value={role} 
-          onValueChange={(value) => setRole(value)}
+          <Select name="department" value={dept} 
+          onValueChange={(value) => setDept(value)}
           required>
             <SelectTrigger className="w-full" id="department">
               <SelectValue placeholder="Select Department" />
@@ -208,7 +228,7 @@ export function SignupForm({
 
         {/* Submit */}
         <Button type="button" onClick={registerUser}  className="w-full">
-          Login
+          Sign up
         </Button>
 
         {/* Divider */}
@@ -226,7 +246,7 @@ export function SignupForm({
               fill="currentColor"
             />
           </svg>
-          Login with Google
+          Sign up with Google
         </Button>
       </div>
 

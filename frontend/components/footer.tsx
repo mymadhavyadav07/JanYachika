@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode_toggle";
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react";
-import { getCurrentUser, User } from "@/lib/getCurrentUser";
+// import { getCurrentUser, User } from "@/lib/getCurrentUser";
 import { useState, useEffect } from "react";
 
 
@@ -20,16 +20,19 @@ interface FooterProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 
-export default function Footer({className}: FooterProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// const [user, setUser] = useState<User | null>(null);
+  // const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getCurrentUser().then((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-  }, []);
+  // useEffect(() => {
+  //   getCurrentUser().then((user) => {
+  //     setUser(user);
+  //     setLoading(false);
+  //   });
+  // }, []);
+
+
+export default function Footer({className}: FooterProps) {
+    
 
     const Icons = {
         calendar: (props: IconProps) => <CalendarIcon {...props} />,

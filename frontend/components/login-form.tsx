@@ -35,76 +35,107 @@ export function LoginForm({
   
 
   useEffect(() => {
-          setIsMounted(true);
-          }, []);
+    setIsMounted(true);
+  }, []);
 
 
-  const handleSubmit = async() => {
-    try {
-      const response = await fetch(`${apiBaseUrl}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        
-        body: JSON.stringify({
-          state: state,
+  const handleSubmit = async () => {
+    const res = await fetch(`${apiBaseUrl}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Required for cookies
+      body: JSON.stringify({ state: state,
           dept: dept,
           role: role,
           email: email,
-          password: pass,
-        }),
-      });
+          password: pass, }),
+    });
 
-      if (response.status === 401) {
-        toast("❌ Unauthorized!", {
-          description: "Invalid credentials. Please try again.",
-          action: {
-            label: "Close",
-            onClick: () => {},
-          },
-        });
-        return;
-      }
-
-      if (!response.ok) {
-        toast("❌ Login failed!", {
-          description: "Something went wrong.",
-          action: {
-            label: "Close",
-            onClick: () => {},
-          },
-        });
-        return;
-      }
-
-      const result = await response.json();
-      router.push("/citizen-portal");
-      
-      toast("Login Successful", {
-        description: "Please wait while for a while...",
-        action: {
-          label: "Close",
-          onClick: () => {},
-        },
-      });
-      
-
-
-      // ...handle successful login...
-
-    } catch (error) {
-      console.log(error);
-      toast("❌ Failed to send mail!", {
-        description: "Please check your internet connection.",
-        action: {
-          label: "Close",
-          onClick: () => {},
-        },
-      });
+    if (res.ok) {
+      alert('Login successful!');
+      router.replace("/citizen-portal");
+    } else {
+      alert('Login failed');
     }
-  }
+  };
+
+
+  const handleRoleChange = (value: string) => {
+    setRole(value);
+    
+  };
+
+
+  // const handleSubmit = async() => {
+  //   try {
+  //     const response = await fetch(`${apiBaseUrl}/login`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       credentials: "include",
+        
+  //       body: JSON.stringify({
+  //         state: state,
+  //         dept: dept,
+  //         role: role,
+  //         email: email,
+  //         password: pass,
+  //       }),
+  //     });
+
+  //     if (response.status === 401) {
+  //       toast("❌ Unauthorized!", {
+  //         description: "Invalid credentials. Please try again.",
+  //         action: {
+  //           label: "Close",
+  //           onClick: () => {},
+  //         },
+  //       });
+  //       return;
+  //     }
+
+  //     if (!response.ok) {
+  //       toast("❌ Login failed!", {
+  //         description: "Something went wrong.",
+  //         action: {
+  //           label: "Close",
+  //           onClick: () => {},
+  //         },
+  //       });
+  //       return;
+  //     }
+
+  //     const result = await response.json();
+  //     console.log(result);
+
+  //     setTimeout(() => {
+  //       router.replace("/citizen-portal");
+  //     }, 1000);
+      
+  //     toast("Login Successful", {
+  //       description: "Please wait while for a while...",
+  //       action: {
+  //         label: "Close",
+  //         onClick: () => {},
+  //       },
+  //     });
+      
+
+
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast("❌ Failed to send mail!", {
+  //       description: "Please check your internet connection.",
+  //       action: {
+  //         label: "Close",
+  //         onClick: () => {},
+  //       },
+  //     });
+  //   }
+  // }
   return (
     // <Card className="mx-auto w-full max-w-md shadow-lg">
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -138,7 +169,7 @@ export function LoginForm({
           <Label htmlFor="role">Role</Label>
           <Select name="role"
           value={role} 
-          onValueChange={(value) => setRole(value)}
+          onValueChange={handleRoleChange}
           required >
             <SelectTrigger className="w-full" id="role">
               <SelectValue placeholder="Select role" />

@@ -50,12 +50,13 @@ def login(user: UserLogin, response: Response):
     token = create_access_token({"sub": db_user["email"], 
                                  "role": db_user['role']}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     response.set_cookie(
-        key="access_token",
+        key="auth_token",
         value=token,
         httponly=True,
-        secure=None,
+        secure=False,  # Set to False for development, True for production
         samesite="Lax",
-        max_age=60 * 60 * 24
+        max_age=60 * 60 * 24,
+      
     )
 
     return {"message": "Logged in"}
@@ -88,10 +89,10 @@ async def login_google(request: Request, response: Response):
 
     token = create_access_token({"sub": email}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     response.set_cookie(
-        key="access_token",
+        key="auth_token",
         value=token,
         httponly=True,
-        secure=True,
+        secure=False,  # Set to False for development, True for production
         samesite="Lax",
         max_age=60 * 60 * 24
     )
@@ -99,7 +100,7 @@ async def login_google(request: Request, response: Response):
 
 
 def get_current_user(request: Request):
-    token = request.cookies.get("access_token")
+    token = request.cookies.get("auth_token")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     try:
@@ -115,7 +116,7 @@ def get_me(user: str = Depends(get_current_user)):
 
 @app.post("/logout")
 def logout(response: Response):
-    response.delete_cookie("access_token")
+    response.delete_cookie("auth_token")
     return {"message": "Logged out"}
 
 
