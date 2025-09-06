@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -32,40 +41,40 @@ export default function CitizenPortal() {
   
    
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/me`, {
-          credentials: 'include',
-        });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await fetch(`${apiBaseUrl}/me`, {
+  //         credentials: 'include',
+  //       });
 
-        if (res.status === 401) {
-          console.log("Unauthorized. Redirecting to login...");
-          router.replace("/login");
-          return;
-        }
+  //       if (res.status === 401) {
+  //         console.log("Unauthorized. Redirecting to login...");
+  //         router.replace("/login");
+  //         return;
+  //       }
 
-        if (!res.ok) {
-          throw new Error(`Unexpected error: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`Unexpected error: ${res.status}`);
+  //       }
 
-        const data = await res.json();
-        console.log(data);
-        setIsMounted(true);
+  //       const data = await res.json();
+  //       console.log(data);
+  //       setIsMounted(true);
 
-      } catch (err) {
-        console.log("Failed to fetch data", err);
-        router.replace("/login");
-      }
-    };
+  //     } catch (err) {
+  //       console.log("Failed to fetch data", err);
+  //       router.replace("/login");
+  //     }
+  //   };
 
-    fetchData();
-  }, [router]);
+  //   fetchData();
+  // }, [router]);
 
 
-  if (!isMounted){
-    return null
-  }
+  // if (!isMounted){
+  //   return null
+  // }
   
   const handleSubmit = () => {
     console.log("lol");
@@ -102,7 +111,50 @@ export default function CitizenPortal() {
           e.preventDefault();
           handleSubmit();
         }}>
-            
+          <div className="flex flex-row justify-between">
+            <div className="flex flex-col w-full">
+            <Label className="mb-1 block text-sm font-medium">Select State</Label>
+            <Select>
+              <SelectTrigger className="w-[80%]">
+                <SelectValue placeholder="Select state" />
+              </SelectTrigger>
+              <SelectContent className="h-[18rem]">
+                <SelectGroup>
+                  <SelectLabel>North America</SelectLabel>
+                  <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
+                  <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
+                  <SelectItem value="mst">Mountain Standard Time (MST)</SelectItem>
+                  <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
+                  <SelectItem value="akst">Alaska Standard Time (AKST)</SelectItem>
+                  <SelectItem value="hst">Hawaii Standard Time (HST)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            </div>
+            <div className="flex flex-col w-full">
+            <Label className="mb-1 block text-sm font-medium">Select City</Label>
+            <Select>
+              <SelectTrigger className="w-[80%]">
+                <SelectValue placeholder="Select city" />
+              </SelectTrigger>
+              <SelectContent className="h-[18rem]">
+                <SelectGroup>
+                  <SelectLabel>North America</SelectLabel>
+                  <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
+                  <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
+                  <SelectItem value="mst">Mountain Standard Time (MST)</SelectItem>
+                  <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
+                  <SelectItem value="akst">Alaska Standard Time (AKST)</SelectItem>
+                  <SelectItem value="hst">Hawaii Standard Time (HST)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            </div>
+          </div>
+
+
+
+            <Separator /> 
             <Label className="mb-1 block text-sm font-medium">Title</Label>
             <Input
               id="title"
@@ -122,7 +174,7 @@ export default function CitizenPortal() {
             />
             
             
-            <Label htmlFor="pictures" className="mb-1 block text-sm font-medium">Upload Pictures (Multiple are allowed)</Label>
+            <Label htmlFor="pictures" className="mb-1 block text-sm font-medium mt-2">Upload Pictures (Multiple are allowed)</Label>
             <Input
               id="pictures"
               type="file"
