@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Card } from "@/components/ui/card";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
-
+import { useState, useEffect } from 'react';
 
 const HeatmapMap = dynamic(() => import('@/components/HeatMap'), { ssr: false });
 
@@ -14,6 +14,14 @@ export default function MapView() {
     [37.776, -122.418, 0.8],
     [37.77, -122.42, 0.5],
   ];
+
+  const [isMounted, setIsMounted] = useState(false);
+    
+    useEffect(() => {
+          setIsMounted(true);
+      }, []);
+
+
     return (
         <div className="relative flex flex-col mt-16">
         <Card className="flex flex-col mx-5 gap-5 my-5 justify-center items-center h-[65%] mb-[5rem]" 

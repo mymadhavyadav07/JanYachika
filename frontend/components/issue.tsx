@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import InProgressBadge from "@/components/ui/pending_badge"
-import { ArrowDown, ArrowUp, MapPin } from "lucide-react"
+import { ArrowDown, ArrowUp, MapPin, User } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import {
   Drawer,
@@ -30,9 +30,10 @@ import Link from "next/link"
 
 interface IssueProps extends React.HTMLAttributes<HTMLDivElement> {
     className?: string;
+    officer?: boolean;
 }
 
-export function Issue({className}: IssueProps) {
+export function Issue({className, officer}: IssueProps) {
     const desc = (
         <>
       Enter your email below to login to your account<br />
@@ -52,7 +53,12 @@ export function Issue({className}: IssueProps) {
         <div className="flex flex-col space-y-2 w-full">
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                 <CardTitle>Issue Title</CardTitle>
+                <div className="flex items-center">
+                {officer && <Link href="https://maps.google.com" target="_blank" rel="noopener noreferrer">
+                  <Badge variant="outline" className="mr-2"><User />Officer Assigned</Badge>
+                </Link> }
                 <InProgressBadge />
+                </div>
             </div>
             <CardDescription>
             {desc}

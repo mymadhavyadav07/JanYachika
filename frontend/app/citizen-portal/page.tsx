@@ -9,20 +9,78 @@ import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
-import { Search } from "lucide-react";
+import { Search, ListFilter } from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import { apiBaseUrl } from "@/data/data";
 import { useRouter } from "next/navigation";
 import SplitText from "@/components/blocks/TextAnimations/SplitText/SplitText";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 
+
+type Issue = {
+  id: number;
+  title: string;
+  desc: string;
+  state: string;
+  city: string;
+  photos: string[];
+};
+
+
 export default function CitizenPortal() {
   const router = useRouter();
+  const [placeholder, setPlaceholder] = useState<string>("Search issues by title...");
   const [isMounted, setIsMounted] = useState(false);
+  const [filter, setFilter] = useState<string>("issue_title");
+  const [query, setQuery] = useState<string>("");
+  const [issues, setIssues] = useState<Issue[]>([]);
 
   useEffect(() => {
         setIsMounted(true);
     }, []);
 
+  
+  const handleSearch = async () => {
+    try{
+      const response = await fetch(`${apiBaseUrl}/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', 
+
+        body: JSON.stringify({ query: query,
+            filter: filter,
+           }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log(result.message)
+
+    
+    } catch(error){
+        console.log(error);
+      }
+  };
 
   
 
@@ -61,7 +119,7 @@ export default function CitizenPortal() {
           }}>
             <div className="flex justify-center">
               <ShinyText 
-                text="Recent Issues" 
+                text="Reported Issues" 
                 disabled={false} 
                 speed={3} 
                 className='text-3xl font-normal mb-5' 
@@ -72,15 +130,52 @@ export default function CitizenPortal() {
               <Input
               id="title"
               className="mb-2"
-              placeholder="Search Issues..."
-              // value={title}
-              // onChange={e => setTitle(e.target.value)}
-              // required
+              placeholder={placeholder}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+
             />
-            <Button variant={"outline"}><Search></Search></Button>
+            <Button variant={"outline"} onClick={handleSearch}><Search></Search></Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"outline"}><ListFilter></ListFilter></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 sm:mr-9 mr-2" align="start">
+                <DropdownMenuItem
+                  onSelect={() => {setFilter("issue_title"); setPlaceholder("Search issues by title...")}}
+                  className={`cursor-pointer`}
+                >
+                  Issue Title
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onSelect={() => {setFilter("state"); setPlaceholder("Search issues by state...")}}
+                  className={`cursor-pointer`}
+                >
+                  State
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onSelect={() => {setFilter("city"); setPlaceholder("Search issues by city...")}}
+                  className={`cursor-pointer`}
+                >
+                  City
+                </DropdownMenuItem>
+
+                {/* <DropdownMenuItem
+                  onSelect={() => {setFilter("upvotes"); setPlaceholder("Search issues by upvotes...")}}
+                  className={`cursor-pointer`}
+                >
+                  Upvotes
+                </DropdownMenuItem> */}
+   
+                
+              </DropdownMenuContent>
+            </DropdownMenu>
             </div>
       
-            <Issue />
+      
+            <Issue officer={true}/>
             <Issue />
             <Issue />
             <Issue />
