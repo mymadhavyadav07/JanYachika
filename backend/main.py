@@ -174,11 +174,11 @@ def register(user: UserCreate):
         filtered_issues.append(issue)
     return filtered_issues
 
-issues = [
-    {"Title": "Road Repair", "State": "California", "City": "Los Angeles"},
-    {"Title": "Water Leakage", "State": "California", "City": "San Francisco"},
-    {"Title": "Road Repair", "State": "Nevada", "City": "Las Vegas"},
-]
+    issues = [
+        {"Title": "Road Repair", "State": "California", "City": "Los Angeles"},
+        {"Title": "Water Leakage", "State": "California", "City": "San Francisco"},
+        {"Title": "Road Repair", "State": "Nevada", "City": "Las Vegas"},
+    ]
 
-result = get_issues(issues, title="Road Repair", state="California")
-print(result)
+    result = get_issues(issues, title="Road Repair", state="California")
+    print(result)
