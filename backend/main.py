@@ -160,3 +160,25 @@ def register(user: UserCreate):
     supabase.table("users").insert(new_user_data).execute()
 
     return {"message": "User created successfully"}
+
+    def get_issues(issues, title=None, state=None, city=None):
+
+    filtered_issues = []
+    for issue in issues:
+        if title and issue.get('Title') != title:
+            continue
+        if state and issue.get('State') != state:
+            continue
+        if city and issue.get('City') != city:
+            continue
+        filtered_issues.append(issue)
+    return filtered_issues
+
+issues = [
+    {"Title": "Road Repair", "State": "California", "City": "Los Angeles"},
+    {"Title": "Water Leakage", "State": "California", "City": "San Francisco"},
+    {"Title": "Road Repair", "State": "Nevada", "City": "Las Vegas"},
+]
+
+result = get_issues(issues, title="Road Repair", state="California")
+print(result)
