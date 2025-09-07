@@ -161,6 +161,8 @@ def register(user: UserCreate):
 
     return {"message": "User created successfully"}
 
+    
+    @app.get("/issues")
     def get_issues(issues, title=None, state=None, city=None):
 
     filtered_issues = []
