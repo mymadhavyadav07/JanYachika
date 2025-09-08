@@ -121,7 +121,6 @@
   }
 }
 
-
 @keyframes shine {
   0% {
     background-position: 100%;
@@ -134,7 +133,6 @@
 .animate-shine {
   animation: shine 5s linear infinite;
 }
-
 
 ::-webkit-scrollbar-button {
   display: none;
