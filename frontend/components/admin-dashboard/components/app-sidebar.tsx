@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   IconCamera,
@@ -17,7 +18,8 @@ import {
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers
+  IconUsers,
+  IconLayoutSidebarRightExpand
 } from "@tabler/icons-react";
 
 import {
@@ -27,7 +29,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { NavDocuments } from "./nav-documents";
 import { NavMain } from "./nav-main";
@@ -35,6 +38,7 @@ import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 
 import { projectName } from "@/data/data";
+import { Button } from "@/components/ui/button";
 
 const data = {
   user: {
@@ -45,27 +49,27 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/admin-portal",
+      url: "/admin",
       icon: IconDashboard
     },
     {
       title: "Pending Issues",
-      url: "/admin-portal/pending-issues",
+      url: "/admin/pending-issues",
       icon: IconListDetails
     },
     {
       title: "In-Progress Issues",
-      url: "/admin-portal/in-progress-issues",
+      url: "/admin/in-progress-issues",
       icon: IconChartBar
     },
     {
       title: "Resolved Issues",
-      url: "/admin-portal/resolved-issues",
+      url: "/admin/resolved-issues",
       icon: IconFolder
     },
     {
       title: "Officers",
-      url: "/admin-portal/officers",
+      url: "/admin/officers",
       icon: IconUsers
     }
   ],
@@ -136,35 +140,36 @@ const data = {
   ],
   documents: [
     {
-      name: "Data Library",
-      url: "#",
+      name: "Review issues",
+      url: "/admin/review-issues",
       icon: IconDatabase
     },
     {
-      name: "Reports",
+      name: "Review officer registration",
       url: "#",
       icon: IconReport
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord
     }
   ]
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+
+export function AppSidebar({...props }: React.ComponentProps<typeof Sidebar>) {
+  
+
   return (
-    <Sidebar collapsible="none" className="h-auto border-r" {...props}>
+    <Sidebar collapsible="icon" variant="sidebar" className="h-auto border-r" {...props}>
+      
       <SidebarHeader className="border-b">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+          <SidebarMenuItem className="flex flex-row">
+            <SidebarMenuButton asChild>
               <Link href="#">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">{projectName}</span>
               </Link>
             </SidebarMenuButton>
+            
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

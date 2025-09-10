@@ -5,7 +5,7 @@ import { DataTable } from "@/components/admin-dashboard/components/data-table";
 import { SectionCards } from "@/components/admin-dashboard/components/section-cards";
 import { SiteHeader } from "@/components/admin-dashboard/components/site-header";
 
-import data from "@/app/admin-portal/data.json";
+import data from "@/app/admin/data.json";
 
 export default function Page() {
   return (
@@ -19,7 +19,7 @@ export default function Page() {
       }>
       <AppSidebar variant="sidebar" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader header="Dashboard" />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

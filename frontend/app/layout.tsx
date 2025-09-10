@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const loginPortal = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname.startsWith("/admin-portal");
+  const loginPortal = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname.startsWith("/admin");
   const [isMounted, setIsMounted] = useState(false);
   
     useEffect(() => {
