@@ -1,8 +1,7 @@
+
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin-dashboard/components/app-sidebar";
-import { ChartAreaInteractive } from "@/components/admin-dashboard/components/chart-area-interactive";
 import { DataTable } from "@/components/admin-dashboard/components/data-table";
-import { SectionCards } from "@/components/admin-dashboard/components/section-cards";
 import { SiteHeader } from "@/components/admin-dashboard/components/site-header";
 
 import data from "@/app/admin-portal/data.json";
@@ -19,12 +18,26 @@ export default function Page() {
       }>
       <AppSidebar variant="sidebar" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader  header={"In-Progress Issues"}/>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
+              {/* <SectionCards /> */}
+              <div className="flex flex-col gap-2 px-4 lg:px-6 items-center">
+                {/* <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue />
+                <Issue /> */}
+
+
                 {/* <ChartAreaInteractive /> */}
               </div>
               <DataTable data={data} />
