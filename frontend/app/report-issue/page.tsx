@@ -24,11 +24,17 @@ import { Textarea } from "@/components/ui/textarea";
 import BlurText from "@/components/blocks/TextAnimations/BlurText/BlurText";
 import dynamic from "next/dynamic";
 import { apiBaseUrl } from "@/data/data";
-
+import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false });
+
+type StateOption = {
+  id: number;
+  state_name: string;
+};
 
 export default function CitizenPortal() {
   const router = useRouter();
@@ -38,49 +44,128 @@ export default function CitizenPortal() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isChecking, setIsChecking] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [selectedCity, setSelectedCity] = useState<string>("");
   
-   
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await fetch(`${apiBaseUrl}/me`, {
-  //         credentials: 'include',
-  //       });
-
-  //       if (res.status === 401) {
-  //         console.log("Unauthorized. Redirecting to login...");
-  //         router.replace("/login");
-  //         return;
-  //       }
-
-  //       if (!res.ok) {
-  //         throw new Error(`Unexpected error: ${res.status}`);
-  //       }
-
-  //       const data = await res.json();
-  //       console.log(data);
-  //       setIsMounted(true);
-
-  //     } catch (err) {
-  //       console.log("Failed to fetch data", err);
-  //       router.replace("/login");
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [router]);
-
-
-  // if (!isMounted){
-  //   return null
-  // }
   
-  const handleSubmit = () => {
-    console.log("lol");
-    console.log(location);
+  const [states, setStates] = useState<StateOption[]>([]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const fetchStates = async () => {
+          try {
+            const res = await fetch(`${apiBaseUrl}/fetch_states_and_dept`); 
+            const data = await res.json();
+    
+            setStates(data.states.data);
+    
+          } catch (error) {
+            console.error('Failed to fetch states:', error);
+          }
+
+        };
+
+        fetchStates();
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
     };
+
+    fetchData();
+  }, [router]);
+
+
+
+  if (!isMounted){
+    return null
+  }
+  
+  const handleSubmit = async () => {
+    try {
+      // Create FormData for multipart/form-data submission
+      const formData = new FormData();
+      
+      // Add text fields
+      formData.append('state', selectedState || "0");
+      formData.append('city', selectedCity);
+      formData.append('title', title);
+      formData.append('description', description);
+      
+      // Add location data if available
+      if (location) {
+        formData.append('latitude', location.lat.toString());
+        formData.append('longitude', location.lng.toString());
+      }
+      
+      // Add files if any
+      if (pictures && pictures.length > 0) {
+        for (let i = 0; i < pictures.length; i++) {
+          formData.append('files', pictures[i]);
+        }
+      }
+
+      const res = await fetch(`${apiBaseUrl}/report-issue`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData, // Don't set Content-Type header, let browser set it with boundary
+      });
+
+      if (res.ok) {
+        toast("Issue Reported Successfully", {
+          description: "Your issue has been submitted and will be reviewed soon.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+        // Reset form
+        setTitle("");
+        setDescription("");
+        setPictures(null);
+        setLocation(null);
+        setSelectedState("");
+        setSelectedCity("");
+        router.push("/citizen-portal");
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        toast("Failed to Report Issue", {
+          description: errorData.message || "Please try again later.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      toast("Error", {
+        description: "An error occurred while submitting your issue. Please try again.",
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+    }
+  };
     
     
 
@@ -114,38 +199,36 @@ export default function CitizenPortal() {
           <div className="flex flex-row justify-between">
             <div className="flex flex-col w-full">
             <Label className="mb-1 block text-sm font-medium">Select State</Label>
-            <Select>
+            <Select name="state" value={selectedState}
+             onValueChange={(value) => (setSelectedState(value))} required >
               <SelectTrigger className="w-[80%]">
                 <SelectValue placeholder="Select state" />
               </SelectTrigger>
               <SelectContent className="h-[18rem]">
                 <SelectGroup>
-                  <SelectLabel>North America</SelectLabel>
-                  <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
-                  <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
-                  <SelectItem value="mst">Mountain Standard Time (MST)</SelectItem>
-                  <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
-                  <SelectItem value="akst">Alaska Standard Time (AKST)</SelectItem>
-                  <SelectItem value="hst">Hawaii Standard Time (HST)</SelectItem>
+                  <SelectLabel>States</SelectLabel>
+                  {states.map((state) => (
+                    <SelectItem key={state.id} value={state.id.toString()}>
+                      {state.state_name}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
             </div>
             <div className="flex flex-col w-full">
             <Label className="mb-1 block text-sm font-medium">Select City</Label>
-            <Select>
+            <Select name="city" value={selectedCity}
+            onValueChange={(value) => (setSelectedCity(value))} required >
               <SelectTrigger className="w-[80%]">
                 <SelectValue placeholder="Select city" />
               </SelectTrigger>
               <SelectContent className="h-[18rem]">
                 <SelectGroup>
-                  <SelectLabel>North America</SelectLabel>
-                  <SelectItem value="est">Eastern Standard Time (EST)</SelectItem>
-                  <SelectItem value="cst">Central Standard Time (CST)</SelectItem>
-                  <SelectItem value="mst">Mountain Standard Time (MST)</SelectItem>
-                  <SelectItem value="pst">Pacific Standard Time (PST)</SelectItem>
-                  <SelectItem value="akst">Alaska Standard Time (AKST)</SelectItem>
-                  <SelectItem value="hst">Hawaii Standard Time (HST)</SelectItem>
+                  <SelectLabel>Cities</SelectLabel>
+                  <SelectItem value="delhi">Delhi</SelectItem>
+                  <SelectItem value="mumbai">Mumbai</SelectItem>
+                  <SelectItem value="pune">Pune</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -188,7 +271,7 @@ export default function CitizenPortal() {
             <LocationPicker onLocationSelect={(lat, lng) => setLocation({ lat, lng })} />
 
             <div className="flex justify-center mt-5">
-                <Button className="w-[50%]" type="submit">Submit</Button>
+                <Button className="w-[50%]" type="button" onClick={handleSubmit}>Submit</Button>
             </div>
         </form>
       </Card>

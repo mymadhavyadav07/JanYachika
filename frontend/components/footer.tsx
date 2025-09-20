@@ -60,23 +60,23 @@ export default function Footer({className}: FooterProps) {
     const DATA = {
         navbar: [
             { href: "/", icon: HomeIcon, label: "Home" },
-            { href: "#", icon: PencilIcon, label: "Blog" },
+    
         ],
         contact: {
             social: {
             profile: {
                 name: "Edit Profile",
-                url: "#",
+                url: "/profile",
                 icon: Icons.profile,
             },
             issue: {
                 name: "Raise Issue",
-                url: "#",
+                url: "/report-issue",
                 icon: Icons.issue,
             },
             heatmap: {
                 name: "View Heatmap",
-                url: "#",
+                url: "/map-view",
                 icon: Icons.heatmap,
             },
             logout: {

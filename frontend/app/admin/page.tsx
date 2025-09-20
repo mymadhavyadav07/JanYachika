@@ -1,3 +1,5 @@
+"use client"
+
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin-dashboard/components/app-sidebar";
 import { DataTable } from "@/components/admin-dashboard/components/data-table";
@@ -8,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 
 import data from "@/app/admin/data.json";
-
+import { redirect, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { apiBaseUrl } from "@/data/data";
 
 export function Header(){
   return(
@@ -29,6 +33,42 @@ export function Header(){
 
 
 export default function Page() {
+  const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
+
+    fetchData();
+  }, [router]);
+
+  if (!isMounted)
+    return null
+
   return (
     <SidebarProvider
       className="min-h-screen"

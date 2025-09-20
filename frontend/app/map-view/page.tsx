@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { Card } from "@/components/ui/card";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 import { useState, useEffect } from 'react';
+import { redirect, useRouter } from 'next/navigation';
+import { apiBaseUrl } from '@/data/data';
 
 const HeatmapMap = dynamic(() => import('@/components/HeatMap'), { ssr: false });
 
@@ -16,13 +18,45 @@ export default function MapView() {
   ];
 
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
     
-    useEffect(() => {
-          setIsMounted(true);
-      }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
+
+    fetchData();
+  }, [router]);
 
 
-    return (
+  if (!isMounted){
+    return null
+  }
+
+
+    return (isMounted && (
         <div className="relative flex flex-col mt-16">
         <Card className="flex flex-col mx-5 gap-5 my-5 justify-center items-center h-[65%] mb-[5rem]" 
           style={{background: "transparent",
@@ -55,6 +89,6 @@ export default function MapView() {
 
     )
 
-
+    )
 
 }

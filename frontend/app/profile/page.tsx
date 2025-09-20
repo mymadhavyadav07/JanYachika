@@ -4,7 +4,8 @@ import ProfileHeader from "./profile-header";
 import ProfileContent from "./profile-content";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import { redirect, useRouter } from "next/navigation";
+import { apiBaseUrl } from "@/data/data";
 
 
 export default function Page() {
@@ -19,6 +20,39 @@ export default function Page() {
     dp: "",
   });
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(data);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
+
+    fetchData();
+  }, [router]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -37,7 +71,6 @@ export default function Page() {
           const resJson = await res.json();
           const dataArray = resJson.data;
 
-          // Make sure the array has at least one object
           if (Array.isArray(dataArray) && dataArray.length > 0) {
             const data = dataArray[0]; 
             console.log("Data", data);
@@ -59,7 +92,6 @@ export default function Page() {
           }
         }
       } catch (e) {
-        // handle error if needed
         toast("Error fetching profile data.", {
           description: "Please try again later."
         });
@@ -69,7 +101,7 @@ export default function Page() {
       }
     }
     fetchProfile();
-  }, []);
+  }, [isMounted]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setProfile((prev) => ({
@@ -78,10 +110,10 @@ export default function Page() {
     }));
   }
 
-  return (
+  return ( isMounted && (
     <div className="container mx-auto space-y-6 px-4 py-10 mt-[5%] mb-[2rem]">
       <ProfileHeader profile={profile} />
       <ProfileContent profile={profile} loading={loading} handleChange={handleChange}/>
     </div>
-  );
+  ));
 }

@@ -7,13 +7,24 @@ import { DataTable } from "@/components/admin-dashboard/components/officers-tabl
 import { SectionCards } from "@/components/admin-dashboard/components/section-cards";
 import { SiteHeader } from "@/components/admin-dashboard/components/site-header";
 
-import officers from "@/app/admin/officers.json";
-import { useState } from "react";
+// import officers from "@/app/admin/officers.json";
+import { useState, useEffect } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { IconLayoutSidebarRight } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
+import { apiBaseUrl } from "@/data/data";
+import { useRouter } from "next/navigation";
 
+
+
+interface Officer {
+  id: number;
+  first_name: string;
+  email: string;
+  dept: string;
+
+}
 
 export function Header(){
   return(
@@ -33,6 +44,46 @@ export function Header(){
 }
 
 export default function Page() {
+  const [officers, setOfficers] = useState<Officer[]>([]);
+  const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
+
+
+
+
+  useEffect(() => {
+    const fetchOfficers = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/get-officers`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          router.replace("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setOfficers(data.officers);
+        console.log(officers);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        router.replace("/login");
+      }
+    };
+
+    fetchOfficers();
+  }, [router]);
+
+
+
 
   return (
     <SidebarProvider
