@@ -22,12 +22,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 COUNTRY_STATE_API_KEY = ""
 
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # frontend origin 
+    allow_origins=origin_list, # frontend origin 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

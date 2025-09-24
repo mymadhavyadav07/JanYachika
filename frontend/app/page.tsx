@@ -31,8 +31,8 @@ export default function Home() {
           className="m-5 text-lg text-center w-[100%] font-normal dark:text-gray-300 text-gray-600"
         />
         <div className="flex flex-row gap-[1rem] justify-center">
-          <Button variant={"outline"} onClick={() => {redirect("/about");}}>About Us</Button>
           <Button onClick={() => {redirect("/login");}}>Get Started</Button>
+          <Button variant={"outline"} onClick={() => {redirect("/about");}}>About Us</Button>
         </div>
         
       </div>
