@@ -12,7 +12,7 @@ import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import ClickSpark from "@/components/ClickSpark";
-
+import TransitionWrapper from "@/components/TransitionWrapper";
 import 'leaflet/dist/leaflet.css';
 
 
@@ -52,6 +52,7 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange >
+          <TransitionWrapper>
           <ClickSpark
             sparkColor='#fff'
             sparkSize={10}
@@ -72,14 +73,17 @@ export default function RootLayout({
   />
           </div>
 
+          
           <div style={{ position: 'relative', minHeight: '100vh' }}>
             <main className="min-h-screen">{children}</main>
             <Toaster />
           </div>
           
+          
         
         {!loginPortal && <Footer className=""/>}
         </ClickSpark>
+        </TransitionWrapper>
         </ThemeProvider>
         
       </body>

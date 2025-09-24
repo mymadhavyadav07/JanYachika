@@ -24,6 +24,8 @@ COUNTRY_STATE_API_KEY = ""
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
+print("ORIGIN", origin_list)
+
 
 app = FastAPI()
 
@@ -64,8 +66,8 @@ def login(user: UserLogin, response: Response):
         key="auth_token",
         value=token,
         httponly=True,
-        secure=False,  # Set to False for development, True for production
-        samesite="Lax",
+        secure=True,  # Set to False for development, True for production
+        samesite="none",
         max_age=60 * 60 * 24,
         path="/"
     )
