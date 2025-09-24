@@ -56,71 +56,65 @@ export default function CitizenPortal() {
   const [issues, setIssues] = useState<Issue[]>([]);
 
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await fetch(`${apiBaseUrl}/me`, {
-  //         credentials: 'include',
-  //       });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
 
-  //       if (res.status === 401) {
-  //         console.log("Unauthorized. Redirecting to login...");
-  //         redirect("/login");
-  //         return;
-  //       }
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+         
+        }
 
-  //       if (!res.ok) {
-  //         throw new Error(`Unexpected error: ${res.status}`);
-  //       }
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
 
-  //       const data = await res.json();
-  //       if (data.role != "admin")
-  //         redirect("/403");
+        
+        const data = await res.json();
+        setIsMounted(true);
 
-  //       console.log(data);
-  //       setIsMounted(true);
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
 
-  //     } catch (err) {
-  //       console.log("Failed to fetch data", err);
-  //       redirect("/login");
-  //     }
-  //   };
+    const fetchIssues = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/search-issues`, {
+          credentials: 'include',
+        });
 
-  //   const fetchIssues = async () => {
-  //     try {
-  //       const res = await fetch(`${apiBaseUrl}/search-issues`, {
-  //         credentials: 'include',
-  //       });
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+        }
 
-  //       if (res.status === 401) {
-  //         console.log("Unauthorized. Redirecting to login...");
-  //         redirect("/login");
-  //         return;
-  //       }
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
 
-  //       if (!res.ok) {
-  //         throw new Error(`Unexpected error: ${res.status}`);
-  //       }
+        const data = await res.json();
+        setIssues(data.issues);
+        setIsMounted(true);
 
-  //       const data = await res.json();
-  //       setIssues(data.issues);
-  //       setIsMounted(true);
-
-  //     } catch (err) {
-  //       console.log("Failed to fetch data", err);
-  //       redirect("/login");
-  //     }
-  //   };
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
 
 
-  //   fetchData();
-  //   fetchIssues();
-  // }, [router]);
+    fetchData();
+    fetchIssues();
+  }, [router]);
 
 
-  // if (!isMounted){
-  //   return null
-  // }
+  if (!isMounted) return null;
 
   
   
@@ -170,7 +164,6 @@ export default function CitizenPortal() {
           threshold={0.1}
           rootMargin="-100px"
           textAlign="center"
-          // onLetterAnimationComplete={handleAnimationComplete}
         />
         <Label className="m-5 text-lg font-normal dark:text-gray-300 text-gray-600">A platform for reporting civic issues and get them resolved by the respective authorities.</Label>
         <div className="flex flex-row gap-5">
