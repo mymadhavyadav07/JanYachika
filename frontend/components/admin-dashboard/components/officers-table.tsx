@@ -103,7 +103,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const schema = z.object({
   id: z.number(),
-  fullname: z.string(),
+  first_name: z.string(),
   email: z.email(),
   dept: z.string(),
  
@@ -535,12 +535,12 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className="text-foreground w-fit px-0 text-left">
-          {item.fullname}
+          {item.first_name}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.fullname}</DrawerTitle>
+          <DrawerTitle>{item.first_name}</DrawerTitle>
           <DrawerDescription>Showing total visitors for the last 6 months</DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
@@ -598,7 +598,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <Label htmlFor="header">Full Name</Label>
-              <Input id="header" defaultValue={item.fullname} />
+              <Input id="header" defaultValue={item.first_name} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">

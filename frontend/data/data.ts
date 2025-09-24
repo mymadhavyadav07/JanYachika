@@ -10,7 +10,7 @@ export const navItems = [
       },
       {
         name: "About Us",
-        link: "/team",
+        link: "/about",
       },
       {
         name: "Map View",

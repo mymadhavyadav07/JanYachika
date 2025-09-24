@@ -27,18 +27,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { apiBaseUrl } from "@/data/data";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import SplitText from "@/components/blocks/TextAnimations/SplitText/SplitText";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 
 
 type Issue = {
   id: number;
-  title: string;
-  desc: string;
-  state: string;
-  city: string;
+  officer_id: number;
+  issue_title: string;
+  issue_description: string;
   photos: string[];
+  latitude: string,
+  longitude: string,
+  issue_status: string,
+  downvotes: number;
+  upvotes: number;
+
 };
 
 
@@ -50,14 +55,72 @@ export default function CitizenPortal() {
   const [query, setQuery] = useState<string>("");
   const [issues, setIssues] = useState<Issue[]>([]);
 
-  useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/me`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+         
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        
+        const data = await res.json();
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
+
+    const fetchIssues = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/search-issues`, {
+          credentials: 'include',
+        });
+
+        if (res.status === 401) {
+          console.log("Unauthorized. Redirecting to login...");
+          redirect("/login");
+        }
+
+        if (!res.ok) {
+          throw new Error(`Unexpected error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setIssues(data.issues);
+        setIsMounted(true);
+
+      } catch (err) {
+        console.log("Failed to fetch data", err);
+        redirect("/login");
+      }
+    };
+
+
+    fetchData();
+    fetchIssues();
+  }, [router]);
+
+
+  if (!isMounted) return null;
+
+  
   
   const handleSearch = async () => {
     try{
-      const response = await fetch(`${apiBaseUrl}/search`, {
+      const response = await fetch(`${apiBaseUrl}/search-issues`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +137,7 @@ export default function CitizenPortal() {
       }
 
       const result = await response.json();
-      console.log(result.message)
+      console.log(result.issues)
 
     
     } catch(error){
@@ -101,12 +164,11 @@ export default function CitizenPortal() {
           threshold={0.1}
           rootMargin="-100px"
           textAlign="center"
-          // onLetterAnimationComplete={handleAnimationComplete}
         />
         <Label className="m-5 text-lg font-normal dark:text-gray-300 text-gray-600">A platform for reporting civic issues and get them resolved by the respective authorities.</Label>
         <div className="flex flex-row gap-5">
-          <Button variant={"outline"} onClick={() => {router.push("/profile")}}>My Reports</Button>
-          <Button onClick={() => {router.push("/report-issue")}}>Report an issue</Button>
+          <Button variant={"outline"} onClick={() => {redirect("#")}}>My Reports</Button>
+          <Button onClick={() => {redirect("/report-issue")}}>Report an issue</Button>
         </div>
        
       </div>
@@ -173,19 +235,25 @@ export default function CitizenPortal() {
               </DropdownMenuContent>
             </DropdownMenu>
             </div>
-      
-      
-            <Issue officer={true}/>
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
+              
 
+            {issues.map((issue) => (
+              <Issue 
+              officer_id={issue.officer_id}
+              issue_title={issue.issue_title}
+              issue_description={issue.issue_description}
+              issue_status={issue.issue_status}
+              latitude={issue.latitude}
+              longitude={issue.longitude}
+              photos={issue.photos}
+              upvotes={issue.upvotes}
+              downvotes={issue.downvotes}
+
+              key={issue.id} />
+                
+            ))}
+      
+            
             
             
           </Card>

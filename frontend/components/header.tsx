@@ -42,7 +42,7 @@ export default function Header({ className }: HeaderProps) {
                 <NavItems items={navItems} />
                 <div className="flex items-center gap-4">
                 <NavbarButton variant="secondary" href="/login">Login</NavbarButton>
-                <NavbarButton variant="primary">Book a call</NavbarButton>
+                <NavbarButton variant="primary" href="/register">Sign Up</NavbarButton>
                 </div>
             </NavBody>
     

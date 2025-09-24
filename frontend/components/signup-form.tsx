@@ -17,7 +17,17 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { apiBaseUrl } from "@/data/data";
+import { redirect } from "next/navigation";
 
+type StateOption = {
+  id: number;
+  state_name: string;
+};
+
+type Depts = {
+  id: number;
+  dep_name: string;
+}
 
 export function SignupForm({
   className,
@@ -25,18 +35,33 @@ export function SignupForm({
 }: React.ComponentProps<"form">) {
   const [isMounted, setIsMounted] = useState(false);
   const [show, setShow] = useState(false);
-  const [state, setState] = useState<string>("");
-  const [dept, setDept] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>();
+  const [selectedDept, setSelectedDept] = useState<string>();
   const [fname, setFname] = useState<string>("");
   const [lname, setLname] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [pass, setPass] = useState<string>("");
   const [role, setRole] = useState<string>("");
 
-  useEffect(() => {
-          setIsMounted(true);
-          }, []);
+  const [states, setStates] = useState<StateOption[]>([]);
+  const [depts, setDepts] = useState<Depts[]>([]);  
 
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}/fetch_states_and_dept`); 
+        const data = await res.json();
+
+        setStates(data.states.data);
+        setDepts(data.depts.data);
+
+      } catch (error) {
+        console.error('Failed to fetch states:', error);
+      }
+    };
+
+    fetchStates();
+  }, []);
 
   const registerUser = async() => {
 
@@ -50,8 +75,8 @@ export function SignupForm({
             fname: fname,
             lname: lname,
             email: email,
-            state: state,
-            dept: dept,
+            state: parseInt(selectedState || "0"),
+            dept: parseInt(selectedDept || "0"),
             role: role,
             passwrd: pass
         }),
@@ -80,6 +105,8 @@ export function SignupForm({
             onClick: () => {},
           },
       })
+
+      redirect("/");
 
   
     } catch (error) {
@@ -112,16 +139,18 @@ export function SignupForm({
         <div className="grid gap-3">
           <Label htmlFor="state">State</Label>
           <Select name="state"
-           value={state} 
-           onValueChange={(value) => setState(value)} 
+           value={selectedState} 
+           onValueChange={(value) => setSelectedState(value)} 
            required >
             <SelectTrigger className="w-full" id="state">
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Uttar Pradesh">Uttar Pradesh</SelectItem>
-              <SelectItem value="Delhi">Delhi</SelectItem>
-              <SelectItem value="Madhya Pradesh">Madhya Pradesh</SelectItem>
+            {states.map((state) => (
+                <SelectItem key={state.id} value={state.id.toString()}>
+                  {state.state_name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -150,17 +179,18 @@ export function SignupForm({
         {(role === "admin" || role === "officer") && (
         <div className="grid gap-3">
           <Label htmlFor="department">Department</Label>
-          <Select name="department" value={dept} 
-          onValueChange={(value) => setDept(value)}
+          <Select name="department" value={selectedDept} 
+          onValueChange={(value) => setSelectedDept(value)}
           required>
             <SelectTrigger className="w-full" id="department">
               <SelectValue placeholder="Select Department" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="it">IT</SelectItem>
-              <SelectItem value="hr">HR</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
-              <SelectItem value="operations">Operations</SelectItem>
+              {depts.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id.toString()}>
+                  {dept.dep_name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -208,6 +238,11 @@ export function SignupForm({
               className="pr-10"
               id="password"
               type={show ? "text" : "password"}
+              value={pass}
+              onChange={(e) => {
+                setPass(e.target.value);
+                console.log("Password: ", pass);
+              }}
               required
             />
             <Button
