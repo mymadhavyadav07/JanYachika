@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
 import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
+import ClickSpark from "@/components/ClickSpark";
 
 import 'leaflet/dist/leaflet.css';
 
@@ -51,7 +52,13 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange >
-
+          <ClickSpark
+            sparkColor='#fff'
+            sparkSize={10}
+            sparkRadius={15}
+            sparkCount={8}
+            duration={400}
+          >
           <div className="fixed inset-0 -z-10 w-full min-h-screen">
              <Particles
     particleColors={['#dc2626', '#f97316']}
@@ -72,6 +79,7 @@ export default function RootLayout({
           
         
         {!loginPortal && <Footer className=""/>}
+        </ClickSpark>
         </ThemeProvider>
         
       </body>

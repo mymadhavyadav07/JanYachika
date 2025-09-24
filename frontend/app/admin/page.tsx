@@ -54,6 +54,9 @@ export default function Page() {
         }
 
         const data = await res.json();
+        if (data.role != "admin")
+          redirect("/403");
+
         console.log(data);
         setIsMounted(true);
 
@@ -66,8 +69,8 @@ export default function Page() {
     fetchData();
   }, [router]);
 
-  if (!isMounted)
-    return null
+  // if (!isMounted)
+    // return null
 
   return (
     <SidebarProvider

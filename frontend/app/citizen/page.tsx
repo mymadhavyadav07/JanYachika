@@ -56,68 +56,71 @@ export default function CitizenPortal() {
   const [issues, setIssues] = useState<Issue[]>([]);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/me`, {
-          credentials: 'include',
-        });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await fetch(`${apiBaseUrl}/me`, {
+  //         credentials: 'include',
+  //       });
 
-        if (res.status === 401) {
-          console.log("Unauthorized. Redirecting to login...");
-          redirect("/login");
-          return;
-        }
+  //       if (res.status === 401) {
+  //         console.log("Unauthorized. Redirecting to login...");
+  //         redirect("/login");
+  //         return;
+  //       }
 
-        if (!res.ok) {
-          throw new Error(`Unexpected error: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`Unexpected error: ${res.status}`);
+  //       }
 
-        const data = await res.json();
-        console.log(data);
-        setIsMounted(true);
+  //       const data = await res.json();
+  //       if (data.role != "admin")
+  //         redirect("/403");
 
-      } catch (err) {
-        console.log("Failed to fetch data", err);
-        redirect("/login");
-      }
-    };
+  //       console.log(data);
+  //       setIsMounted(true);
 
-    const fetchIssues = async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/search-issues`, {
-          credentials: 'include',
-        });
+  //     } catch (err) {
+  //       console.log("Failed to fetch data", err);
+  //       redirect("/login");
+  //     }
+  //   };
 
-        if (res.status === 401) {
-          console.log("Unauthorized. Redirecting to login...");
-          redirect("/login");
-          return;
-        }
+  //   const fetchIssues = async () => {
+  //     try {
+  //       const res = await fetch(`${apiBaseUrl}/search-issues`, {
+  //         credentials: 'include',
+  //       });
 
-        if (!res.ok) {
-          throw new Error(`Unexpected error: ${res.status}`);
-        }
+  //       if (res.status === 401) {
+  //         console.log("Unauthorized. Redirecting to login...");
+  //         redirect("/login");
+  //         return;
+  //       }
 
-        const data = await res.json();
-        setIssues(data.issues);
-        setIsMounted(true);
+  //       if (!res.ok) {
+  //         throw new Error(`Unexpected error: ${res.status}`);
+  //       }
 
-      } catch (err) {
-        console.log("Failed to fetch data", err);
-        redirect("/login");
-      }
-    };
+  //       const data = await res.json();
+  //       setIssues(data.issues);
+  //       setIsMounted(true);
 
-
-    fetchData();
-    fetchIssues();
-  }, [router]);
+  //     } catch (err) {
+  //       console.log("Failed to fetch data", err);
+  //       redirect("/login");
+  //     }
+  //   };
 
 
-  if (!isMounted){
-    return null
-  }
+  //   fetchData();
+  //   fetchIssues();
+  // }, [router]);
+
+
+  // if (!isMounted){
+  //   return null
+  // }
 
   
   
@@ -171,8 +174,8 @@ export default function CitizenPortal() {
         />
         <Label className="m-5 text-lg font-normal dark:text-gray-300 text-gray-600">A platform for reporting civic issues and get them resolved by the respective authorities.</Label>
         <div className="flex flex-row gap-5">
-          <Button variant={"outline"} onClick={() => {router.push("/profile")}}>My Reports</Button>
-          <Button onClick={() => {router.push("/report-issue")}}>Report an issue</Button>
+          <Button variant={"outline"} onClick={() => {redirect("#")}}>My Reports</Button>
+          <Button onClick={() => {redirect("/report-issue")}}>Report an issue</Button>
         </div>
        
       </div>
@@ -258,17 +261,6 @@ export default function CitizenPortal() {
             ))}
       
             
-            {/* <Issue officer={true}/> */}
-            {/* <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue />
-            <Issue /> */}
-
             
             
           </Card>
