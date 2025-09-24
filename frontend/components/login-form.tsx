@@ -88,7 +88,7 @@ export function LoginForm({
           onClick: () => {},
         },
       });
-      redirect("/citizen-portal");
+      redirect("/citizen");
     } else {
       alert('Login failed');
     }
@@ -264,7 +264,6 @@ export function LoginForm({
               value={pass}
               onChange={(e) => {
                 setPass(e.target.value);
-                console.log("Password: ", pass);
               }}
               required
             />

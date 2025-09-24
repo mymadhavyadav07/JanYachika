@@ -24,11 +24,11 @@ const TransitionWrapper = ({ children }: { children: React.ReactNode }) => {
             initial={{ y: 0 }}
             animate={{ y: "-100%" }}
             exit={{ y: "-100%" }}
-            transition={{ duration: 1, ease: "easeInOut" }}
+            transition={{ duration: 1.3, ease: "easeInOut" }}
             className={styles.imageWrapper}
           >
             <img
-              src="/landscape.jfif"
+              src="/loader.png"
               alt="Transition Landscape"
               className={styles.image}
             />

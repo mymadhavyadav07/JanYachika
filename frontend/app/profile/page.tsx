@@ -21,39 +21,40 @@ export default function Page() {
   });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(true);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${apiBaseUrl}/me`, {
-          credentials: 'include',
-        });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await fetch(`${apiBaseUrl}/me`, {
+  //         credentials: 'include',
+  //       });
 
-        if (res.status === 401) {
-          console.log("Unauthorized. Redirecting to login...");
-          redirect("/login");
-          return;
-        }
+  //       if (res.status === 401) {
+  //         console.log("Unauthorized. Redirecting to login...");
+  //         redirect("/login");
+  //         return;
+  //       }
 
-        if (!res.ok) {
-          throw new Error(`Unexpected error: ${res.status}`);
-        }
+  //       if (!res.ok) {
+  //         throw new Error(`Unexpected error: ${res.status}`);
+  //       }
 
-        const data = await res.json();
-        console.log(data);
-        setIsMounted(true);
+  //       const data = await res.json();
+  //       console.log(data);
+  //       setIsMounted(true);
 
-      } catch (err) {
-        console.log("Failed to fetch data", err);
-        redirect("/login");
-      }
-    };
+  //     } catch (err) {
+  //       console.log("Failed to fetch data", err);
+  //       redirect("/login");
+  //     }
+  //   };
 
-    fetchData();
-  }, [router]);
+  //   fetchData();
+  // }, [router]);
 
+  
   useEffect(() => {
     async function fetchProfile() {
       try {

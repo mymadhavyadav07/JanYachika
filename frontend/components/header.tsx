@@ -64,7 +64,6 @@ export default function Header({ className }: HeaderProps) {
                     <a
                     key={`mobile-link-${idx}`}
                     href={item.link}
-                    onClick={() => setIsMobileMenuOpen(false)}
                     className="relative text-neutral-600 dark:text-neutral-300"
                     >
                     <span className="block">{item.name}</span>
@@ -72,18 +71,18 @@ export default function Header({ className }: HeaderProps) {
                 ))}
                 <div className="flex w-full flex-col gap-4">
                     <NavbarButton
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    href="/login"
                     variant="primary"
                     className="w-full"
                     >
                     Login
                     </NavbarButton>
                     <NavbarButton
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    href="/register"
                     variant="primary"
                     className="w-full"
                     >
-                    Book a call
+                    Sign Up
                     </NavbarButton>
                 </div>
                 </MobileNavMenu>
