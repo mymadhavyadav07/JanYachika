@@ -10,15 +10,92 @@
   width: 100vw;
   height: 100vh;
   z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .pageContent {
   position: relative;
   z-index: 1;
+}
+
+/* CSS-based image switching to prevent flash */
+.desktopImage {
+  display: block;
+}
+
+.mobileImage {
+  display: none;
+}
+
+/* Mobile devices - switch to mobile image and optimize display */
+@media (max-width: 768px) {
+  .imageWrapper {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    padding: 0;
+    
+    background: #1d171b;
+    
+  }
+  
+  .desktopImage {
+    display: none;
+  }
+  
+  .mobileImage {
+    display: block;
+    width: 100%;
+    height: 100%;
+    
+    object-fit: contain;
+    object-position: center;
+    
+  }
+  
+  .image {
+    object-fit: contain;
+    object-position: center;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .imageWrapper {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .image {
+    object-fit: contain;
+    object-position: center;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .imageWrapper {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  .image {
+    object-fit: contain;
+    object-position: center;
+  }
 }
