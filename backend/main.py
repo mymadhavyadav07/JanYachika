@@ -25,6 +25,7 @@ PROD_ENV = False
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
+print(f"CORS allowed origins: {origin_list}")  # DEBUG LOG
 
 app = FastAPI()
 
