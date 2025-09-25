@@ -123,29 +123,16 @@ export default function Footer({className}: FooterProps) {
               <DockIcon key={name}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    {social.onClick ? (
-                      <button
-                        onClick={social.onClick}
-                        aria-label={social.name}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon" }),
-                          "size-12 rounded-full ",
-                        )}
-                      >
-                        <social.icon className="size-4" />
-                      </button>
-                    ) : (
-                      <Link
-                        href={social.url}
-                        aria-label={social.name}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon" }),
-                          "size-12 rounded-full ",
-                        )}
-                      >
-                        <social.icon className="size-4" />
-                      </Link>
-                    )}
+                    <Link
+                      href={social.url}
+                      aria-label={social.name}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon" }),
+                        "size-12 rounded-full ",
+                      )}
+                    >
+                      <social.icon className="size-4" />
+                    </Link>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{social.name}</p>
