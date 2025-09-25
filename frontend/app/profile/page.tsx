@@ -59,15 +59,20 @@ export default function Page() {
     async function fetchProfile() {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-        const token = localStorage.getItem("access_token");
-        const res = await fetch(`${baseUrl}/api/profile/`, {
+        const res = await fetch(`${baseUrl}/api/profile`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       
+        if (res.status === 401) {
+          toast("Session expired. Please login again.");
+          router.push("/login");
+          return;
+        }
+        
         if (res.ok) {
           const resJson = await res.json();
           const dataArray = resJson.data;
@@ -86,11 +91,15 @@ export default function Page() {
               dp: data.dp || "",
             });
 
-
-    
+            console.log(profile);
           } else {
             toast("No profile data found.");
           }
+        } else {
+          const errorData = await res.json();
+          toast("Failed to load profile data", {
+            description: errorData.detail || "Please try again later."
+          });
         }
       } catch (e) {
         toast("Error fetching profile data.", {

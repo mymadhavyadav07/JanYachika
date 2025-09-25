@@ -12,7 +12,7 @@ import { apiBaseUrl } from "@/data/data";
 import { redirect, useRouter } from "next/navigation";
 import SplitText from "@/components/blocks/TextAnimations/SplitText/SplitText";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
-
+import niti from "@/public/Niti.jpeg"
 
 type Issue = {
   id: number;
@@ -144,13 +144,13 @@ export default function CitizenPortal() {
       url: "https://linkedin.com/in/mymadhavyadav07"
     },
     {
-      image: "https://i.pravatar.cc/300?img=2",
-      title: "Mike Chen",
-      subtitle: "Backend Engineer",
-      handle: "@mikechen",
+      image: `${niti.src}`,
+      title: "Niti Mishra",
+      subtitle: "Database Admin",
+      handle: "@niti-mishra",
       borderColor: "#10B981",
       gradient: "linear-gradient(180deg, #10B981, #000)",
-      url: "https://linkedin.com/in/mikechen"
+      url: "https://www.linkedin.com/in/niti-mishra-16b34a326"
     },
     {
       image: "https://i.pravatar.cc/300?img=2",
@@ -212,7 +212,7 @@ export default function CitizenPortal() {
             <Label className="m-5 text-lg font-normal dark:text-gray-300 text-gray-600">Say hi to the team behind JanYachika👋</Label>
         </div>
 
-        <div style={{ height: '100%', position: 'relative', marginBottom: "5rem" }}>
+        <div style={{ height: '50%', position: 'relative', marginBottom: "5rem" }}>
             <ChromaGrid 
                 items={items}
                 radius={300}

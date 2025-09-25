@@ -46,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        {!loginPortal && <Header className="mt-2" />}
+        {!loginPortal && <Header className="" />}
         
         <ThemeProvider attribute="class"
             defaultTheme="system"

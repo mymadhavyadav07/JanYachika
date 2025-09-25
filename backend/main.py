@@ -21,17 +21,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 COUNTRY_STATE_API_KEY = ""
+PROD_ENV = False
 
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
-print("ORIGIN", origin_list)
-
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://janyachika.vercel.app"], # frontend origin 
+    allow_origins=origin_list, # frontend origin 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,15 +61,27 @@ def login(user: UserLogin, response: Response):
 
     token = create_access_token({"sub": db_user["email"], 
                                  "role": db_user['role']}, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    response.set_cookie(
-        key="auth_token",
-        value=token,
-        httponly=True,
-        secure=True,  # Set to False for development, True for production
-        samesite="none",
-        max_age=60 * 60 * 24,
-        path="/"
-    )
+    
+    if PROD_ENV:
+        response.set_cookie(
+            key="auth_token",
+            value=token,
+            httponly=True,
+            secure=True,  # Set to False for development, True for production
+            samesite="none",
+            max_age=60 * 60 * 24,
+            path="/"
+        )
+    else:
+        response.set_cookie(
+            key="auth_token",
+            value=token,
+            httponly=True,
+            secure=False,  # Set to False for development, True for production
+            samesite="lax",
+            max_age=60 * 60 * 24,
+            path="/"
+        )
 
     return {"message": "Logged in"}
 
@@ -311,6 +322,142 @@ async def report_issue(
         raise HTTPException(status_code=500, detail=f"Error reporting issue: {str(e)}")
 
 
+
+
+
+@app.get("/api/profile")
+def get_profile(
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get user profile information using cookie-based authentication
+    """
+    try:
+        result = supabase.table("users").select("*").eq("email", user["sub"]).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        user_data = result.data[0]
+        
+        # Transform the data to match frontend expectations
+        profile_data = {
+            "first_name": user_data.get("first_name"),
+            "last_name": user_data.get("last_name"),
+            "email": user_data.get("email"),
+            "phone": user_data.get("phone"),
+            "bio": user_data.get("bio"),
+            "location": user_data.get("address"),  # mapping address to location
+            "dp": user_data.get("dp"),
+            "created_at": user_data.get("created_at"),
+            "role": user_data.get("role"),
+            "state": user_data.get("state"),
+            "dept": user_data.get("dept")
+        }
+        
+        return {"message": "Profile retrieved successfully", "data": [profile_data]}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving profile: {str(e)}")
+
+@app.post("/upload-profile-picture")
+async def upload_profile_picture(
+    file: UploadFile = File(...),
+    user: dict = Depends(get_current_user)
+):
+    """
+    Upload profile picture to Supabase storage and update user dp field
+    """
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="Only image files are allowed")
+        
+        # Validate file size (limit to 5MB)
+        content = await file.read()
+        if len(content) > 5 * 1024 * 1024:  # 5MB
+            raise HTTPException(status_code=400, detail="File size must be less than 5MB")
+        
+        # Generate unique filename
+        file_extension = os.path.splitext(file.filename)[1] if file.filename else '.jpg'
+        unique_filename = f"profile_pictures/{user['sub']}/{uuid.uuid4()}{file_extension}"
+        
+        # Get current profile picture to delete it later (optional cleanup)
+        current_user_result = supabase.table("users").select("dp").eq("email", user["sub"]).execute()
+        old_dp_url = current_user_result.data[0].get("dp") if current_user_result.data else None
+        
+        # Upload to Supabase storage
+        upload_result = supabase.storage.from_("uploads").upload(
+            unique_filename,
+            content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        if upload_result:
+            # Get public URL
+            file_url = supabase.storage.from_("uploads").get_public_url(unique_filename)
+            
+            # Update user's dp field in database
+            result = supabase.table("users").update({"dp": file_url}).eq("email", user["sub"]).execute()
+            
+            if not result.data:
+                raise HTTPException(status_code=404, detail="User not found")
+            
+            # Optional: Clean up old profile picture (silently ignore errors)
+            if old_dp_url and "uploads" in old_dp_url:
+                try:
+                    # Extract filename from old URL for deletion
+                    old_filename = old_dp_url.split("/uploads/")[-1]
+                    supabase.storage.from_("uploads").remove([old_filename])
+                except Exception as cleanup_error:
+                    print(f"Warning: Could not delete old profile picture: {cleanup_error}")
+            
+            return {
+                "message": "Profile picture updated successfully",
+                "dp_url": file_url
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to upload file")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error uploading profile picture: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading profile picture: {str(e)}")
+
+@app.post("/api/profile/update")
+def update_profile_api(
+    profile_data: ProfileUpdate,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Update user profile information via API endpoint using cookie-based authentication
+    """
+    try:
+        update_data = {}
+        if profile_data.first_name is not None:
+            update_data["first_name"] = profile_data.first_name
+        if profile_data.last_name is not None:
+            update_data["last_name"] = profile_data.last_name
+        if profile_data.phone is not None:
+            update_data["phone"] = profile_data.phone
+        if profile_data.address is not None:
+            update_data["address"] = profile_data.address
+        if profile_data.dp is not None:
+            update_data["dp"] = profile_data.dp
+        
+        if not update_data:
+            raise HTTPException(status_code=400, detail="No fields to update")
+        
+        result = supabase.table("users").update(update_data).eq("email", user["sub"]).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {"message": "Profile updated successfully", "user": result.data[0]}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating profile: {str(e)}")
 
 @app.put("/update-profile")
 def update_profile(

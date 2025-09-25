@@ -34,7 +34,7 @@ export default function Header({ className }: HeaderProps) {
 
 
   return (
-        <div className={`relative w-full mt-1 ${className ?? ""}`}>
+        <div className={`relative w-full ${className ?? ""}`}>
             <Navbar>
             {/* Desktop Navigation */}
             <NavBody>
