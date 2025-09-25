@@ -49,7 +49,7 @@ export default function Home() {
           WebkitBackdropFilter: "blur(5px)",
 
           }}>
-            <div className="flex flex-col">
+            <div className="flex flex-col mx-4">
                 <SplitText
                   text="Download Android App."
                   className="text-4xl ml-5 font-semibold"
@@ -70,6 +70,7 @@ export default function Home() {
               </div>
             
             </div>
+            <div className="hidden sm:block">
             <div className="mockup-phone border-[#1e1c1a] transform scale-50 sm:scale-40 md:scale-45 lg:scale-50 xl:scale-40">
               <div className="mockup-phone-camera"></div>
               <div className="mockup-phone-display">
@@ -79,6 +80,7 @@ export default function Home() {
                   className="w-full h-full object-cover"
                 />
               </div>
+            </div>
             </div>
           
       </Card>

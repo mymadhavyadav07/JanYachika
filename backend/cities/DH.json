@@ -1,0 +1,38 @@
+[
+    {
+        "id": 131639,
+        "name": "Dadra",
+        "latitude": "20.32504000",
+        "longitude": "72.96618000"
+    },
+    {
+        "id": 131640,
+        "name": "Dadra & Nagar Haveli",
+        "latitude": "20.20651000",
+        "longitude": "73.00811000"
+    },
+    {
+        "id": 131649,
+        "name": "Daman",
+        "latitude": "20.41431000",
+        "longitude": "72.83236000"
+    },
+    {
+        "id": 131779,
+        "name": "Diu",
+        "latitude": "20.72081000",
+        "longitude": "70.93989000"
+    },
+    {
+        "id": 133937,
+        "name": "Silvassa",
+        "latitude": "20.27386000",
+        "longitude": "72.99673000"
+    },
+    {
+        "id": 134459,
+        "name": "Amli",
+        "latitude": "20.28333000",
+        "longitude": "73.01667000"
+    }
+]

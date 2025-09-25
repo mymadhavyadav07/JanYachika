@@ -18,6 +18,7 @@ export default function Page() {
     location: "",
     joinedDate: "",
     dp: "",
+    role: ""
   });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -89,6 +90,7 @@ export default function Page() {
               location: data.location || "",
               joinedDate: data.created_at || "",
               dp: data.dp || "",
+              role: data.role || "User"
             });
 
             console.log(profile);

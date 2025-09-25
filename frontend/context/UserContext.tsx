@@ -4,9 +4,8 @@
 import { createContext, useContext } from 'react';
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
+  sub: string;  // email from JWT payload
+  role: string;
 }
 
 export const UserContext = createContext<User | null>(null);

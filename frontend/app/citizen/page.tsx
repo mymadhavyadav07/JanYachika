@@ -34,6 +34,7 @@ import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 
 type Issue = {
   id: number;
+  dp: string;
   officer_id: number;
   issue_title: string;
   issue_description: string;
@@ -248,6 +249,8 @@ export default function CitizenPortal() {
               photos={issue.photos}
               upvotes={issue.upvotes}
               downvotes={issue.downvotes}
+              id={issue.id}
+              dp={issue.dp}
 
               key={issue.id} />
                 

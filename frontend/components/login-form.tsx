@@ -17,7 +17,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect } from "react";
 import { apiBaseUrl } from "@/data/data";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 
 type StateOption = {
@@ -34,6 +34,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [show, setShow] = useState(false);
   const [role, setRole] = useState<string>("");
@@ -41,6 +42,7 @@ export function LoginForm({
   const [pass, setPass] = useState<string>("");
   const [selectedDept, setSelectedDept] = useState<string>();
   const [selectedState, setSelectedState] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [states, setStates] = useState<StateOption[]>([]);
   const [depts, setDepts] = useState<Depts[]>([]);
@@ -67,30 +69,73 @@ export function LoginForm({
 
 
   const handleSubmit = async () => {
-    const res = await fetch(`${apiBaseUrl}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ state: parseInt(selectedState || "0"),
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const res = await fetch(`${apiBaseUrl}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          state: parseInt(selectedState || "0"),
           dept: parseInt(selectedDept || "0"),
           role: role,
           email: email,
-          passwrd: pass, }),
-    });
+          passwrd: pass
+        }),
+      });
 
-    if (res.ok) {
-      toast("Login Successful", {
-        description: "Please wait while for a while...",
+      console.log('Login response status:', res.status);
+      console.log('Login response headers:', Object.fromEntries(res.headers.entries()));
+      
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Login response data:', data);
+        
+        // Check if cookie was set by examining document.cookie
+        const cookies = document.cookie;
+        console.log('Current cookies after login:', cookies);
+        
+        toast("Login Successful", {
+          description: "Redirecting you now...",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+        
+        // Use router.push instead of redirect for client-side navigation
+        // Small delay to ensure cookie is properly set
+        setTimeout(() => {
+          router.push("/citizen");
+        }, 500);
+        
+      } else {
+        const errorData = await res.json().catch(() => ({ message: 'Login failed' }));
+        console.error('Login failed:', errorData);
+        toast("Login Failed", {
+          description: errorData.detail || "Invalid credentials. Please try again.",
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast("Login Error", {
+        description: "Please check your internet connection and try again.",
         action: {
           label: "Close",
           onClick: () => {},
         },
       });
-      redirect("/citizen");
-    } else {
-      alert('Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -284,8 +329,13 @@ export function LoginForm({
         </div>
 
         {/* Submit */}
-        <Button type="button" onClick={handleSubmit} className="w-full">
-          Login
+        <Button 
+          type="button" 
+          onClick={handleSubmit} 
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
 
       </div>

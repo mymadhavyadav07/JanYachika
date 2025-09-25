@@ -34,7 +34,16 @@ const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ss
 type StateOption = {
   id: number;
   state_name: string;
-};
+  state_code: string;
+}
+
+type CityOption = {
+  id: number;
+  name: string;
+  latitude: string;
+  longitude: string;
+}
+
 
 export default function CitizenPortal() {
   const router = useRouter();
@@ -49,6 +58,8 @@ export default function CitizenPortal() {
   
   
   const [states, setStates] = useState<StateOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,6 +103,58 @@ export default function CitizenPortal() {
 
     fetchData();
   }, [router]);
+
+  // Function to fetch cities based on selected state
+  const fetchCities = async (stateCode: string) => {
+    if (!stateCode) {
+      setCities([]);
+      return;
+    }
+
+    setLoadingCities(true);
+    try {
+      const res = await fetch(`${apiBaseUrl}/get_cities?state_code=${stateCode}`);
+      
+      if (!res.ok) {
+        throw new Error(`Failed to fetch cities: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      
+      // The backend returns {"cities": array} where array contains city objects
+      // Each city has: { id, name, latitude, longitude }
+      if (data.cities && Array.isArray(data.cities)) {
+        setCities(data.cities);
+      } else {
+        console.error('Unexpected cities data format:', data);
+        setCities([]);
+      }
+    } catch (error) {
+      console.error('Error fetching cities:', error);
+      toast("Error", {
+        description: "Failed to load cities. Please try again.",
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
+      setCities([]);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  // Handle state selection change
+  const handleStateChange = (value: string) => {
+    setSelectedState(value);
+    setSelectedCity(""); // Reset city selection
+    
+    // Find the selected state to get its code
+    const selectedStateObj = states.find(state => state.id.toString() === value);
+    if (selectedStateObj) {
+      fetchCities(selectedStateObj.state_code.trim());
+    }
+  };
 
 
 
@@ -137,6 +200,7 @@ export default function CitizenPortal() {
             onClick: () => {},
           },
         });
+
         // Reset form
         setTitle("");
         setDescription("");
@@ -144,7 +208,8 @@ export default function CitizenPortal() {
         setLocation(null);
         setSelectedState("");
         setSelectedCity("");
-        router.push("/citizen-portal");
+        
+        router.push("/citizen");
       } else {
         const errorData = await res.json().catch(() => ({}));
         toast("Failed to Report Issue", {
@@ -200,7 +265,7 @@ export default function CitizenPortal() {
             <div className="flex flex-col w-full">
             <Label className="mb-1 block text-sm font-medium">Select State</Label>
             <Select name="state" value={selectedState}
-             onValueChange={(value) => (setSelectedState(value))} required >
+             onValueChange={handleStateChange} required >
               <SelectTrigger className="w-[80%]">
                 <SelectValue placeholder="Select state" />
               </SelectTrigger>
@@ -218,17 +283,38 @@ export default function CitizenPortal() {
             </div>
             <div className="flex flex-col w-full">
             <Label className="mb-1 block text-sm font-medium">Select City</Label>
-            <Select name="city" value={selectedCity}
-            onValueChange={(value) => (setSelectedCity(value))} required >
+            <Select 
+              name="city" 
+              value={selectedCity}
+              onValueChange={(value) => setSelectedCity(value)} 
+              required 
+              disabled={!selectedState || loadingCities}
+            >
               <SelectTrigger className="w-[80%]">
-                <SelectValue placeholder="Select city" />
+                <SelectValue placeholder={loadingCities ? "Loading cities..." : selectedState ? "Select city" : "Select state first"} />
               </SelectTrigger>
               <SelectContent className="h-[18rem]">
                 <SelectGroup>
                   <SelectLabel>Cities</SelectLabel>
-                  <SelectItem value="delhi">Delhi</SelectItem>
-                  <SelectItem value="mumbai">Mumbai</SelectItem>
-                  <SelectItem value="pune">Pune</SelectItem>
+                  {loadingCities ? (
+                    <SelectItem value="loading" disabled>
+                      Loading cities...
+                    </SelectItem>
+                  ) : cities.length > 0 ? (
+                    cities.map((city) => (
+                      <SelectItem key={city.id} value={city.name}>
+                        {city.name}
+                      </SelectItem>
+                    ))
+                  ) : selectedState ? (
+                    <SelectItem value="no-cities" disabled>
+                      No cities found
+                    </SelectItem>
+                  ) : (
+                    <SelectItem value="select-state" disabled>
+                      Please select a state first
+                    </SelectItem>
+                  )}
                 </SelectGroup>
               </SelectContent>
             </Select>

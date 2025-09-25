@@ -15,22 +15,30 @@ export default async function AuthGuard({ children }: AuthGuardProps) {
     redirect('/login');
   }
 
-  const res = await fetch(`${process.env.API_BASE_URL}/me`, {
-    headers: {
-      Cookie: `auth_token=${token}`,
-    },
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/me`, {
+      headers: {
+        Cookie: `auth_token=${token}`,
+      },
+      cache: 'no-store',
+    });
+    
+    if (!res.ok) {
+      console.log('AuthGuard: Authentication failed, redirecting to login');
+      redirect('/login');
+    }
+    
+    const response = await res.json();
+    const user: User = response.message; // Extract the actual user data from the message field
+    
+    return (
+      <UserContext.Provider value={user}>
+        {children}
+      </UserContext.Provider>
+    );
+  } catch (error) {
+    console.error('AuthGuard: Error verifying token:', error);
     redirect('/login');
   }
-
-  const user: User = await res.json();
-
-  return (
-    <UserContext.Provider value={user}>
-      {children}
-    </UserContext.Provider>
-  );
 }
+

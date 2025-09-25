@@ -49,3 +49,18 @@ class StatusUpdate(BaseModel):
     issue_id: int
     status: str
     notes: Optional[str] = None
+
+class SendOTPRequest(BaseModel):
+    email: EmailStr
+
+class VerifyOTPRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
+class VoteRequest(BaseModel):
+    vote_type: str
