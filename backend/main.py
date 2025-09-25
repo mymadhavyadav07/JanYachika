@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import timedelta
-from models import UserLogin, UserCreate, IssueReport, ProfileUpdate, StatusUpdate
+from models import UserLogin, UserCreate, IssueReport, ProfileUpdate, StatusUpdate, SendOTPRequest, VerifyOTPRequest, ResetPasswordRequest, VoteRequest
 from auth_utils import create_access_token
 from google_utils import verify_google_token
 from constants import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -15,6 +15,11 @@ from typing import Optional, List
 import httpx
 import uuid
 import os
+import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta, timezone
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,15 +28,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 COUNTRY_STATE_API_KEY = ""
 PROD_ENV = False
 
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
-origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
-print(f"CORS allowed origins: {origin_list}")  # DEBUG LOG
+# allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+# origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://janyachika.vercel.app"], # frontend origin 
+    allow_origins=["http://localhost:3000", "https://janyachika.vercel.app"], # frontend origin 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -212,6 +216,185 @@ def register(user: UserCreate):
 
 
 
+# ----------------------------------------------- Forgot Password / OTP Functionality --------------------------------------------------------
+
+def generate_otp():
+    """Generate a 6-digit OTP"""
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(email: str, otp: str):
+    """Send OTP via email (configure with your email service)"""
+    try:
+        # Email configuration - You'll need to set these environment variables
+        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        sender_email = os.getenv("SENDER_EMAIL", "")
+        sender_password = os.getenv("SENDER_PASSWORD", "")
+        
+        if not sender_email or not sender_password:
+            print("Email configuration missing. OTP:", otp)
+            return True  # For development, just log the OTP
+        
+        # Create message
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = email
+        message["Subject"] = "JanYachika - Password Reset OTP"
+        
+        # Email body
+        body = f"""
+        <html>
+        <body>
+            <h2>Password Reset Request</h2>
+            <p>Your OTP for password reset is: <strong>{otp}</strong></p>
+            <p>This OTP will expire in 10 minutes.</p>
+            <p>If you didn't request this, please ignore this email.</p>
+            <br>
+            <p>Best regards,<br>JanYachika Team</p>
+        </body>
+        </html>
+        """
+        
+        message.attach(MIMEText(body, "html"))
+        
+        # Send email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        text = message.as_string()
+        server.sendmail(sender_email, email, text)
+        server.quit()
+        
+        return True
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        print(f"Development OTP for {email}: {otp}")  # Log for development
+        return False
+
+@app.post("/send-otp")
+def send_otp(request: SendOTPRequest):
+    """
+    Send OTP to user's email for password reset
+    """
+    try:
+        # Check if user exists
+        result = supabase.table("users").select("email, first_name").eq("email", request.email).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Email not found")
+        
+        user = result.data[0]
+        
+        # Generate OTP
+        otp = generate_otp()
+        otp_expiry = datetime.utcnow() + timedelta(minutes=10)  # expiry time - 10minutes
+        
+        otp_data = {
+            "email": request.email,
+            "otp": otp,
+            "expires_at": otp_expiry.isoformat(),
+            "used": False,
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+
+        existing_otp = supabase.table("otp_tokens").select("*").eq("email", request.email).eq("used", False).execute()
+        
+        if existing_otp.data:
+            supabase.table("otp_tokens").update(otp_data).eq("email", request.email).eq("used", False).execute()
+        else:
+            supabase.table("otp_tokens").insert(otp_data).execute()
+        
+    
+        email_sent = send_otp_email(request.email, otp)
+        
+        if email_sent:
+            return {
+                "message": "OTP sent successfully",
+                "email": request.email,
+                "expires_in": "10 minutes"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to send OTP email")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in send_otp: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/verify-otp")
+def verify_otp(request: VerifyOTPRequest):
+    """
+    Verify the OTP sent to user's email
+    """
+    try:
+        result = supabase.table("otp_tokens").select("*").eq("email", request.email).eq("otp", request.otp).eq("used", False).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+        
+        otp_record = result.data[0]
+        
+    
+        expires_at = datetime.fromisoformat(otp_record["expires_at"])
+        if datetime.utcnow() > expires_at:
+            raise HTTPException(status_code=400, detail="OTP has expired")
+        
+
+        supabase.table("otp_tokens").update({"used": True, "used_at": datetime.utcnow().isoformat()}).eq("id", otp_record["id"]).execute()
+        
+        return {
+            "message": "OTP verified successfully",
+            "email": request.email,
+            "verified": True
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in verify_otp: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/reset-password")
+def reset_password(request: ResetPasswordRequest):
+    """
+    Reset password using verified OTP
+    """
+    try:
+        otp_result = supabase.table("otp_tokens").select("*").eq("email", request.email).eq("otp", request.otp).eq("used", True).execute()
+        
+        if not otp_result.data:
+            raise HTTPException(status_code=400, detail="Invalid OTP or OTP not verified")
+        
+        otp_record = otp_result.data[0]
+        
+        if "used_at" in otp_record and otp_record["used_at"]:
+            used_at = datetime.fromisoformat(otp_record["used_at"])
+            now = datetime.now(timezone.utc)
+            if now - used_at > timedelta(minutes=15):
+                raise HTTPException(status_code=400, detail="OTP verification expired")
+        
+        
+        hashed_password = pwd_context.hash(request.new_password)
+        result = supabase.table("users").update({"pass": hashed_password}).eq("email", request.email).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        supabase.table("otp_tokens").update({"used": True, "used_at": datetime.utcnow().isoformat()}).eq("id", otp_record["id"]).execute()
+        
+        return {
+            "message": "Password reset successfully",
+            "email": request.email
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in reset_password: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 # ----------------------------------------------- Auth End --------------------------------------------------------
     
 @app.get("/search-issues")
@@ -224,7 +407,7 @@ def get_issues(
     Get issues from Supabase with optional filtering
     """
     try:
-        query_builder = supabase.table("issues").select("id,issue_title,issue_description,photos,latitude,longitude,downvotes,upvotes,issue_status,officer_id")
+        query_builder = supabase.table("issues").select("id,issue_title,issue_description,photos,latitude,longitude,downvotes,upvotes,issue_status,officer_id,reporter_email")
         
         if filter and query:
             query_builder = query_builder.eq(filter, query)
@@ -232,6 +415,12 @@ def get_issues(
         #     raise HTTPException(status_code=400, detail="Filter and query are required")
 
         result = query_builder.execute()
+        for i in result.data:
+            reporter_email = i.get("reporter_email")
+            dp = supabase.table("users").select("dp").eq("email", reporter_email).execute()
+            dp = dp.data[0]['dp']
+            i['dp'] = dp
+            
         photos = []
         for i in result.data:
             photos=[]
@@ -242,6 +431,7 @@ def get_issues(
         return {"issues": result.data}
     
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=f"Error fetching issues: {str(e)}")
 
 
@@ -321,6 +511,145 @@ async def report_issue(
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=f"Error reporting issue: {str(e)}")
+
+
+@app.post("/vote-issue/{issue_id}")
+def vote_issue(
+    issue_id: int,
+    vote_request: VoteRequest,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Vote on an issue (upvote or downvote)
+    """
+    try:
+        vote_type = vote_request.vote_type
+        if vote_type not in ["upvote", "downvote"]:
+            raise HTTPException(status_code=400, detail="Invalid vote type. Must be 'upvote' or 'downvote'")
+        
+        # Check if the issue exists
+        issue_result = supabase.table("issues").select("id,upvotes,downvotes").eq("id", issue_id).execute()
+        if not issue_result.data:
+            raise HTTPException(status_code=404, detail="Issue not found")
+        
+        issue = issue_result.data[0]
+        current_upvotes = issue.get("upvotes", 0)
+        current_downvotes = issue.get("downvotes", 0)
+        
+        # Check if user has already voted on this issue
+        existing_vote = supabase.table("issue_votes").select("*").eq("issue_id", issue_id).eq("user_email", user["sub"]).execute()
+        
+        if existing_vote.data:
+            # User has already voted, update the vote
+            existing_vote_data = existing_vote.data[0]
+            old_vote_type = existing_vote_data["vote_type"]
+            
+            if old_vote_type == vote_type:
+                # Same vote type, remove the vote (toggle off)
+                supabase.table("issue_votes").delete().eq("id", existing_vote_data["id"]).execute()
+                
+                # Decrease the count
+                if vote_type == "upvote":
+                    new_upvotes = max(0, current_upvotes - 1)
+                    supabase.table("issues").update({"upvotes": new_upvotes}).eq("id", issue_id).execute()
+                else:
+                    new_downvotes = max(0, current_downvotes - 1)
+                    supabase.table("issues").update({"downvotes": new_downvotes}).eq("id", issue_id).execute()
+                    
+                return {
+                    "message": f"{vote_type.capitalize()} removed",
+                    "vote_type": None,
+                    "upvotes": new_upvotes if vote_type == "upvote" else current_upvotes,
+                    "downvotes": new_downvotes if vote_type == "downvote" else current_downvotes
+                }
+            else:
+                # Different vote type, update the vote
+                supabase.table("issue_votes").update({
+                    "vote_type": vote_type,
+                    "created_at": datetime.utcnow().isoformat()
+                }).eq("id", existing_vote_data["id"]).execute()
+                
+                # Update counts (decrease old type, increase new type)
+                if old_vote_type == "upvote":
+                    new_upvotes = max(0, current_upvotes - 1)
+                    new_downvotes = current_downvotes + 1
+                else:
+                    new_upvotes = current_upvotes + 1
+                    new_downvotes = max(0, current_downvotes - 1)
+                
+                supabase.table("issues").update({
+                    "upvotes": new_upvotes,
+                    "downvotes": new_downvotes
+                }).eq("id", issue_id).execute()
+                
+                return {
+                    "message": f"Vote changed to {vote_type}",
+                    "vote_type": vote_type,
+                    "upvotes": new_upvotes,
+                    "downvotes": new_downvotes
+                }
+        else:
+            # User hasn't voted yet, create new vote
+            supabase.table("issue_votes").insert({
+                "issue_id": issue_id,
+                "user_email": user["sub"],
+                "vote_type": vote_type,
+                "created_at": datetime.utcnow().isoformat()
+            }).execute()
+            
+            # Increase the count
+            if vote_type == "upvote":
+                new_upvotes = current_upvotes + 1
+                supabase.table("issues").update({"upvotes": new_upvotes}).eq("id", issue_id).execute()
+                return {
+                    "message": "Upvoted successfully",
+                    "vote_type": vote_type,
+                    "upvotes": new_upvotes,
+                    "downvotes": current_downvotes
+                }
+            else:
+                new_downvotes = current_downvotes + 1
+                supabase.table("issues").update({"downvotes": new_downvotes}).eq("id", issue_id).execute()
+                return {
+                    "message": "Downvoted successfully",
+                    "vote_type": vote_type,
+                    "upvotes": current_upvotes,
+                    "downvotes": new_downvotes
+                }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error voting on issue: {e}")
+        raise HTTPException(status_code=500, detail=f"Error voting on issue: {str(e)}")
+
+
+@app.get("/issue-vote-status/{issue_id}")
+def get_issue_vote_status(
+    issue_id: int,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get the current user's vote status for an issue
+    """
+    try:
+        # Check if user has voted on this issue
+        vote_result = supabase.table("issue_votes").select("vote_type").eq("issue_id", issue_id).eq("user_email", user["sub"]).execute()
+        
+        if vote_result.data:
+            return {
+                "has_voted": True,
+                "vote_type": vote_result.data[0]["vote_type"]
+            }
+        else:
+            return {
+                "has_voted": False,
+                "vote_type": None
+            }
+    
+    except Exception as e:
+        print(f"Error getting vote status: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting vote status: {str(e)}")
 
 
 
@@ -562,24 +891,42 @@ def get_officers(user: dict = Depends(get_current_user)):
 
 # GET https://api.countrystatecity.in/v1/countries/IN/states
 # For state_codes 
-async def get_cities(state_code: str):
-    country_code = "IN"  # India
-    url = f"https://api.countrystatecity.in/v1/countries/{country_code}/states/{state_code}/cities"
-    headers = {"X-CSCAPI-KEY": COUNTRY_STATE_API_KEY}
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
+# async def get_cities(state_code: str):
+#     country_code = "IN"  # India
+#     url = f"https://api.countrystatecity.in/v1/countries/{country_code}/states/{state_code}/cities"
+#     headers = {"X-CSCAPI-KEY": COUNTRY_STATE_API_KEY}
 
-    if response.status_code == 200:
-        cities = response.json()
-        return [city["name"] for city in cities]
-    elif response.status_code == 401:
-        raise HTTPException(status_code=401, detail="Unauthorized. Invalid API key.")
-    elif response.status_code == 404:
-        raise HTTPException(status_code=404, detail="State not found.")
-    else:
-        raise HTTPException(status_code=500, detail="An error occurred while fetching cities.")
+#     async with httpx.AsyncClient() as client:
+#         response = await client.get(url, headers=headers)
 
+#     if response.status_code == 200:
+#         cities = response.json()
+#         return [city["name"] for city in cities]
+#     elif response.status_code == 401:
+#         raise HTTPException(status_code=401, detail="Unauthorized. Invalid API key.")
+#     elif response.status_code == 404:
+#         raise HTTPException(status_code=404, detail="State not found.")
+#     else:
+#         raise HTTPException(status_code=500, detail="An error occurred while fetching cities.")
+
+
+@app.get("/get_cities")
+def get_cities(state_code: str):
+    try:
+        # Construct the file path based on state code
+        file_path = f'cities/{state_code.upper()}.json'
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            cities_data = json.load(f)
+        
+        # cities_data is an array of city objects with id, name, latitude, longitude
+        return {"cities": cities_data}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Cities not found for state code: {state_code}")
+    except Exception as e:
+        print(f"Error reading cities file: {e}")
+        raise HTTPException(status_code=500, detail="Error loading cities")
 
 @app.get("/fetch_states_and_dept")
 def get_states():
@@ -587,7 +934,7 @@ def get_states():
         states = (
             supabase
             .table("states")
-            .select("id, state_name")
+            .select("id, state_name, state_code")
             .order("state_name")
             .execute()
         )

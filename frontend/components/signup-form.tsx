@@ -105,12 +105,13 @@ export function SignupForm({
             onClick: () => {},
           },
       })
+      setTimeout(() => {redirect("/login")}, 1000);
 
-      redirect("/");
+        
 
   
     } catch (error) {
-      console.log(error)
+      console.log("ERROR:", error)
         toast("❌ Failed to send mail!", {
         description: "Please check your internet connection.",
           action: {
@@ -235,7 +236,6 @@ export function SignupForm({
               value={pass}
               onChange={(e) => {
                 setPass(e.target.value);
-                console.log("Password: ", pass);
               }}
               required
             />

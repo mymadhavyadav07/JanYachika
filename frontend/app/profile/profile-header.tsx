@@ -182,7 +182,7 @@ export default function ProfileHeader({ profile }: { profile: any }) {
           <div className="flex-1 space-y-2">
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <h1 className="text-2xl font-bold">{(profile?.firstName || "Not") + " " + (profile?.lastName || "Available")}</h1>
-              <Badge variant="secondary">Pro Member</Badge>
+              <Badge variant="secondary">{ profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}</Badge>
               
             </div>
             {/* <p className="text-muted-foreground">Senior Product Designer</p> */}
