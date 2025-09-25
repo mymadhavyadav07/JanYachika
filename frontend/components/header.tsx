@@ -40,7 +40,7 @@ export default function Header({ className }: HeaderProps) {
 
         if (res.status === 401) {
           console.log("Unauthorized. Redirecting to login...");
-          redirect("/login");
+          return;
          
         }
 
@@ -57,7 +57,8 @@ export default function Header({ className }: HeaderProps) {
 
       } catch (err) {
         console.log("Failed to fetch data", err);
-        redirect("/login");
+        setIsMounted(true);
+        return;
       }
     };
 
