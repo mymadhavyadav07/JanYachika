@@ -12,7 +12,11 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-export const useAuth = () => {
+/**
+ * Authentication hook that safely checks auth status without causing redirects
+ * @param options.requireAuth - If true, will redirect to login on auth failure
+ */
+export const useAuth = (options?: { requireAuth?: boolean }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isLoading: true,
@@ -23,6 +27,7 @@ export const useAuth = () => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     try {
+      // First check if auth cookie exists (client-side check)
       const hasAuthCookie = isAuthenticated();
       
       if (!hasAuthCookie) {
@@ -34,48 +39,52 @@ export const useAuth = () => {
         return;
       }
 
+      // If cookie exists, verify with backend
       const user = await getCurrentUser();
       
-      if (user) {
+      if (user && user.sub) {
         setAuthState({
           user,
           isLoading: false,
           isAuthenticated: true,
         });
       } else {
+        // Invalid token or failed verification
         setAuthState({
           user: null,
           isLoading: false,
           isAuthenticated: false,
         });
+        
+        // Only redirect if explicitly required
+        if (options?.requireAuth) {
+          window.location.href = '/login';
+        }
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
+      
+      // Always set as not authenticated on error
       setAuthState({
         user: null,
         isLoading: false,
         isAuthenticated: false,
       });
+      
+      // Only redirect if explicitly required
+      if (options?.requireAuth) {
+        window.location.href = '/login';
+      }
     }
   };
 
   const handleLogout = async () => {
     try {
       await logout();
-
-      setAuthState({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      });
+      // logout function handles redirect to login page
     } catch (error) {
       console.error('Logout error:', error);
-
-      setAuthState({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      });
+      // Fallback redirect if logout function fails
       window.location.href = '/login';
     }
   };
