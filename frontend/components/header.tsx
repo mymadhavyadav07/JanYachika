@@ -66,7 +66,7 @@ export default function Header({ className }: HeaderProps) {
         setIsAuthLoading(false);
 
       } catch (err) {
-        if (err.name === 'AbortError') {
+        if (err instanceof Error && err.name === 'AbortError') {
           console.log("Auth check timed out, showing login buttons");
         } else {
           console.log("Failed to fetch auth data:", err);
