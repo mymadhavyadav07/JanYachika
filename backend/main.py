@@ -34,7 +34,7 @@ def truncate_password_for_bcrypt(password: str) -> str:
     return password_bytes.decode('utf-8', errors='ignore')
 
 COUNTRY_STATE_API_KEY = ""
-PROD_ENV = True
+PROD_ENV = False
 
 # allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 # origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
