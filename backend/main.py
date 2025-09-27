@@ -52,6 +52,8 @@ def login(user: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid information")
 
     db_user = result.data[0]
+    print(user.passwrd)
+    print(db_user['pass'])
     if not db_user.get("pass") or not pwd_context.verify(user.passwrd, db_user["pass"]):
         raise HTTPException(status_code=401, detail="Invalid information")
     
