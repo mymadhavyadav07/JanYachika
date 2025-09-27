@@ -26,7 +26,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 COUNTRY_STATE_API_KEY = ""
-PROD_ENV = False
+PROD_ENV = os.getenv("PROD_ENV", "False").lower() == "true"
 
 # allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 # origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
@@ -35,7 +35,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://janyachika.vercel.app"], # frontend origin 
+    allow_origins=[
+        "http://localhost:3000",  # development frontend
+        "https://janyachika.vercel.app"  # production frontend
+    ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
