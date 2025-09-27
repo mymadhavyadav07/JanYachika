@@ -35,7 +35,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://janyachika.vercel.app"], # frontend origin 
+    allow_origins=["http://localhost:3000"], # frontend origin 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -956,5 +956,97 @@ def get_states():
         return {"states": states, "depts": depts}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error while fetching states!")
+
+@app.get("/map-view")
+def get_map_view_data(
+    user: dict = Depends(get_current_user)
+):
+    """
+    Get all issue coordinates for heatmap visualization
+    Returns coordinates in the format expected by the HeatMap component: [[lat, lng, intensity]]
+    """
+    try:
+        # Fetch all non-resolved issues with coordinates and basic info for intensity calculation
+        result = supabase.table("issues").select(
+            "id, latitude, longitude, upvotes, downvotes, issue_status, issue_title, issue_description, city"
+        ).neq("issue_status", "resolved").execute()
+        
+        if not result.data:
+            return {"coordinates": [], "message": "No issues found"}
+        
+        coordinates = []
+        
+        for issue in result.data:
+            try:
+                # Parse latitude and longitude (they might be stored as strings)
+                lat = float(issue["latitude"]) if issue["latitude"] else None
+                lng = float(issue["longitude"]) if issue["longitude"] else None
+                
+                # Skip issues without valid coordinates
+                if lat is None or lng is None:
+                    continue
+                    
+                # Calculate intensity based on votes and status
+                upvotes = issue.get("upvotes", 0) or 0
+                downvotes = issue.get("downvotes", 0) or 0
+                total_votes = upvotes + downvotes
+                
+                # Enhanced base intensity calculation for better visibility
+                # Higher base intensity to ensure visibility at all zoom levels
+                if total_votes > 0:
+                    vote_ratio = upvotes / total_votes if total_votes > 0 else 0.5
+                    # Base intensity of 0.6, increased by vote ratio
+                    intensity = 0.1 + (vote_ratio * 0.4)  # Range: 0.6 to 1.0
+                else:
+                    intensity = 0.1  # Higher default intensity for issues with no votes
+                
+                # Adjust intensity based on status with more pronounced differences
+                status = issue.get("issue_status", "").lower()
+                if status == "in_progress":
+                    intensity = min(1.0, intensity * 1.1)  # Slight increase for in-progress
+                elif status in ["urgent", "high_priority"]:
+                    intensity = min(1.0, intensity * 1.3)  # Significant increase for urgent
+                elif status == "pending":
+                    intensity = min(1.0, intensity * 1.2)  # Increase for pending issues
+                
+                # Apply vote-based boost for high engagement
+                if total_votes >= 5:  # Issues with significant engagement
+                    intensity = min(1.0, intensity * 1.2)
+                elif total_votes >= 10:
+                    intensity = min(1.0, intensity * 1.4)
+                
+                # Ensure intensity is within valid range with higher minimum for visibility
+                intensity = max(0.4, min(1.0, intensity))  # Increased minimum from 0.1 to 0.4
+                
+                # Add to coordinates array in format [lat, lng, intensity]
+                coordinates.append([lat, lng, intensity])
+                
+            except (ValueError, TypeError) as e:
+                # Skip issues with invalid coordinate data
+                print(f"Skipping issue {issue.get('id')} due to invalid coordinates: {e}")
+                continue
+        
+        # Also include some metadata for the frontend
+        metadata = {
+            "total_issues": len(result.data),
+            "issues_with_coordinates": len(coordinates),
+            "center": None  # Will be calculated on frontend or use user's location
+        }
+        
+        # Calculate a reasonable center point if we have coordinates
+        if coordinates:
+            avg_lat = sum(coord[0] for coord in coordinates) / len(coordinates)
+            avg_lng = sum(coord[1] for coord in coordinates) / len(coordinates)
+            metadata["center"] = [avg_lat, avg_lng]
+        
+        return {
+            "coordinates": coordinates,
+            "metadata": metadata,
+            "message": f"Successfully retrieved {len(coordinates)} issues with coordinates"
+        }
+        
+    except Exception as e:
+        print(f"Error in get_map_view_data: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching map data: {str(e)}")
 
 
