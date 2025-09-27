@@ -22,7 +22,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt_truncate=True)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 def truncate_password_for_bcrypt(password: str) -> str:
