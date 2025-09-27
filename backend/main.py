@@ -27,21 +27,19 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 def truncate_password_for_bcrypt(password: str) -> str:
     """
-    Truncate password to 72 bytes for bcrypt compatibility.
     Bcrypt has a limitation of 72 bytes for passwords.
     """
     password_bytes = password.encode('utf-8')[:72]
     return password_bytes.decode('utf-8', errors='ignore')
 
 COUNTRY_STATE_API_KEY = ""
-PROD_ENV = os.getenv("PROD_ENV", False).lower() == "true"
+PROD_ENV = os.getenv("PROD_ENV", "False").lower() == "true"
 
-# allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
-# origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
 
 app = FastAPI()
 
-# Add preflight CORS handler
 @app.options("/{full_path:path}")
 async def options_handler():
     return Response(
@@ -54,16 +52,11 @@ async def options_handler():
         }
     )
 
-# Configure CORS for production and development
-allowed_origins = [
-    "http://localhost:3000",  # development frontend
-    "https://janyachika.vercel.app",  # production frontend
-    "https://*.vercel.app",  # any vercel app
-]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=[
@@ -93,8 +86,6 @@ def login(user: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid information")
 
     db_user = result.data[0]
-    
-    # Truncate password for bcrypt compatibility
     password_truncated = truncate_password_for_bcrypt(user.passwrd)
     
     if not db_user.get("pass") or not pwd_context.verify(password_truncated, db_user["pass"]):
@@ -119,7 +110,7 @@ def login(user: UserLogin, response: Response):
             key="auth_token",
             value=token,
             httponly=True,
-            secure=True,  # Set to False for development, True for production
+            secure=True,  
             samesite="none",
             max_age=60 * 60 * 24,
             path="/"
@@ -129,7 +120,7 @@ def login(user: UserLogin, response: Response):
             key="auth_token",
             value=token,
             httponly=True,
-            secure=False,  # Set to False for development, True for production
+            secure=False,  
             samesite="lax",
             max_age=60 * 60 * 24,
             path="/"
@@ -459,33 +450,95 @@ def get_issues(
 ):
     """
     Get issues from Supabase with optional filtering
+    Supports partial text matching for better search experience
     """
     try:
-        query_builder = supabase.table("issues").select("id,issue_title,issue_description,photos,latitude,longitude,downvotes,upvotes,issue_status,officer_id,reporter_email")
+        # Base query with join to get state information
+        query_builder = supabase.table("issues").select(
+            "id,issue_title,issue_description,photos,latitude,longitude,downvotes,upvotes,issue_status,officer_id,reporter_email,city,state(state_name)"
+        )
         
+        # Apply filters if both filter and query are provided
         if filter and query:
-            query_builder = query_builder.eq(filter, query)
-        # else:
-        #     raise HTTPException(status_code=400, detail="Filter and query are required")
-
-        result = query_builder.execute()
-        for i in result.data:
-            reporter_email = i.get("reporter_email")
-            dp = supabase.table("users").select("dp").eq("email", reporter_email).execute()
-            dp = dp.data[0]['dp']
-            i['dp'] = dp
+            query = query.strip()
             
-        photos = []
-        for i in result.data:
-            photos=[]
-            for j in i['photos']:
-                photos.append(json.loads(j)['url'])
-            i['photos'] = photos
+            if filter == "issue_title":
+                # Use ilike for case-insensitive partial matching
+                query_builder = query_builder.ilike("issue_title", f"%{query}%")
+                
+            elif filter == "city":
+                # Use ilike for case-insensitive partial matching
+                query_builder = query_builder.ilike("city", f"%{query}%")
+                
+            elif filter == "state":
+                # Search by state name using the joined state table
+                query_builder = query_builder.ilike("state.state_name", f"%{query}%")
+                
+            elif filter == "issue_status":
+                # Exact match for status but case-insensitive
+                query_lower = query.lower()
+                if query_lower in ["pending", "in-progress", "resolved"]:
+                    query_builder = query_builder.eq("issue_status", query_lower)
+                else:
+                    # If status doesn't match exactly, return empty results
+                    return {"issues": []}
+                
+            else:
+                raise HTTPException(status_code=400, detail="Invalid filter. Supported filters: issue_title, city, state, issue_status")
         
-        return {"issues": result.data}
+        # Execute the query
+        result = query_builder.execute()
+        
+        # Process results to add user dp (display picture) and format photos
+        processed_issues = []
+        
+        for issue in result.data:
+            try:
+                # Get reporter's display picture
+                reporter_email = issue.get("reporter_email")
+                dp_result = supabase.table("users").select("dp").eq("email", reporter_email).execute()
+                dp = dp_result.data[0].get('dp') if dp_result.data else None
+                issue['dp'] = dp
+                
+                # Process photos - handle potential JSON strings or None values
+                photos = []
+                if issue.get('photos'):
+                    for photo in issue['photos']:
+                        if photo:  # Check if photo is not None
+                            try:
+                                if isinstance(photo, str):
+                                    photo_data = json.loads(photo)
+                                    photos.append(photo_data.get('url', ''))
+                                elif isinstance(photo, dict):
+                                    photos.append(photo.get('url', ''))
+                            except (json.JSONDecodeError, AttributeError):
+                                # Skip invalid photo data
+                                continue
+                
+                issue['photos'] = photos
+                
+                # Flatten state information for easier frontend consumption
+                if issue.get('state') and isinstance(issue['state'], dict):
+                    issue['state_name'] = issue['state'].get('state_name')
+                
+                processed_issues.append(issue)
+                
+            except Exception as e:
+                print(f"Error processing issue {issue.get('id')}: {e}")
+                # Continue with other issues even if one fails
+                continue
+        
+        return {
+            "issues": processed_issues,
+            "count": len(processed_issues),
+            "filter_applied": filter if filter and query else None,
+            "search_query": query if filter and query else None
+        }
     
+    except HTTPException:
+        raise
     except Exception as e:
-        print(e)
+        print(f"Error in search_issues: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching issues: {str(e)}")
 
 
