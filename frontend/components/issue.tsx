@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import PendingBadge from "@/components/ui/pending_badge"
-import { ArrowDown, ArrowUp, MapPin, User } from "lucide-react"
+import { ArrowDown, ArrowUp, MapPin, User, MapPinIcon } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import {
   Drawer,
@@ -48,12 +48,14 @@ interface IssueProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'id'> {
     longitude?: string;
     id?: number;
     dp?: string;
+    city?: string;
+    state_name?: string;
 
 }
 
 export function Issue({className, officer_id, 
   issue_title, issue_description, issue_status,
-   upvotes, downvotes, photos, latitude, longitude, id, dp}: IssueProps
+   upvotes, downvotes, photos, latitude, longitude, id, dp, city, state_name}: IssueProps
   ) {
     const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
     
@@ -160,6 +162,16 @@ export function Issue({className, officer_id,
             <CardDescription>
             {issue_description || ""}
             </CardDescription>
+            
+            {/* Location information */}
+            {(city || state_name) && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                <MapPinIcon className="h-3 w-3" />
+                <span>
+                  {city && state_name ? `${city}, ${state_name}` : city || state_name}
+                </span>
+              </div>
+            )}
 
             <Drawer>
                 <DrawerTrigger asChild>
@@ -182,6 +194,16 @@ export function Issue({className, officer_id,
                     <DrawerDescription>
                         {issue_description || ""}
                     </DrawerDescription>
+                    
+                    {/* Location information in drawer */}
+                    {(city || state_name) && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                        <MapPinIcon className="h-4 w-4" />
+                        <span className="font-medium">
+                          Location: {city && state_name ? `${city}, ${state_name}` : city || state_name}
+                        </span>
+                      </div>
+                    )}
                     </DrawerHeader>
                     <Separator />
                     <div className="flex overflow-x-auto gap-4 p-4">

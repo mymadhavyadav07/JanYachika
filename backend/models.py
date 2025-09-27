@@ -64,3 +64,13 @@ class ResetPasswordRequest(BaseModel):
 
 class VoteRequest(BaseModel):
     vote_type: str
+
+class SearchRequest(BaseModel):
+    query: Optional[str] = None
+    filter: Optional[str] = None
+    
+class SearchResponse(BaseModel):
+    issues: List[dict]
+    count: int
+    filter_applied: Optional[str] = None
+    search_query: Optional[str] = None

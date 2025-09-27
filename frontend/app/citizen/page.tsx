@@ -9,7 +9,7 @@ import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
-import { Search, ListFilter } from "lucide-react";
+import { Search, ListFilter, X } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -44,6 +44,8 @@ type Issue = {
   issue_status: string,
   downvotes: number;
   upvotes: number;
+  city?: string;
+  state_name?: string;
 
 };
 
@@ -55,6 +57,10 @@ export default function CitizenPortal() {
   const [filter, setFilter] = useState<string>("issue_title");
   const [query, setQuery] = useState<string>("");
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [allIssues, setAllIssues] = useState<Issue[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
 
   useEffect(() => {
@@ -101,6 +107,7 @@ export default function CitizenPortal() {
 
         const data = await res.json();
         setIssues(data.issues);
+        setAllIssues(data.issues); // Store original issues for clearing search
         setIsMounted(true);
 
       } catch (err) {
@@ -114,23 +121,42 @@ export default function CitizenPortal() {
     fetchIssues();
   }, [router]);
 
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+    };
+  }, [debounceTimer]);
+
 
   if (!isMounted) return null;
 
   
   
   const handleSearch = async () => {
-    try{
-      const response = await fetch(`${apiBaseUrl}/search-issues`, {
-        method: 'POST',
+    if (!query.trim()) {
+      // If query is empty, show all issues
+      setIssues(allIssues);
+      setHasSearched(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Use query parameters instead of body for GET request
+      const searchParams = new URLSearchParams({
+        query: query.trim(),
+        filter: filter
+      });
+      
+      const response = await fetch(`${apiBaseUrl}/search-issues?${searchParams}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', 
-
-        body: JSON.stringify({ query: query,
-            filter: filter,
-           }),
+        credentials: 'include',
       });
   
       if (!response.ok) {
@@ -138,12 +164,30 @@ export default function CitizenPortal() {
       }
 
       const result = await response.json();
-      console.log(result.issues)
+      setIssues(result.issues || []);
+      setHasSearched(true);
+      console.log('Search results:', result.issues);
 
-    
-    } catch(error){
-        console.log(error);
-      }
+    } catch(error) {
+      console.error('Search error:', error);
+      // Show user-friendly error message
+      setIssues([]);
+      setHasSearched(true);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setQuery("");
+    setIssues(allIssues);
+    setHasSearched(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   
@@ -190,39 +234,97 @@ export default function CitizenPortal() {
 
             </div>
             <div className="w-[85%] flex justify-center mt-5 mx-5 gap-2">
-              <Input
-              id="title"
-              className="mb-2"
-              placeholder={placeholder}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-
-            />
-            <Button variant={"outline"} onClick={handleSearch}><Search></Search></Button>
+              <div className="relative flex-1">
+                <Input
+                  id="title"
+                  className="mb-2 pr-10"
+                  placeholder={placeholder}
+                  value={query}
+                  onChange={(e) => {
+                    const newQuery = e.target.value;
+                    setQuery(newQuery);
+                    
+                    // Clear existing timer
+                    if (debounceTimer) {
+                      clearTimeout(debounceTimer);
+                    }
+                    
+                    // Set new timer for auto-search after 500ms of no typing
+                    const timer = setTimeout(() => {
+                      if (newQuery.trim() || hasSearched) {
+                        handleSearch();
+                      }
+                    }, 500);
+                    
+                    setDebounceTimer(timer);
+                  }}
+                  onKeyPress={handleKeyPress}
+                />
+                {query && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1 h-6 w-6 p-0 hover:bg-gray-200"
+                    onClick={handleClearSearch}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <Button 
+                variant={"outline"} 
+                onClick={handleSearch}
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+              </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant={"outline"}><ListFilter></ListFilter></Button>
+                <Button variant={"outline"}>
+                  <ListFilter className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">
+                    {filter === 'issue_title' ? 'Title' : 
+                     filter === 'state' ? 'State' : 
+                     filter === 'city' ? 'City' : 
+                     filter === 'issue_status' ? 'Status' : 'Filter'}
+                  </span>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 sm:mr-9 mr-2" align="start">
                 <DropdownMenuItem
                   onSelect={() => {setFilter("issue_title"); setPlaceholder("Search issues by title...")}}
-                  className={`cursor-pointer`}
+                  className={`cursor-pointer ${filter === 'issue_title' ? 'bg-accent' : ''}`}
                 >
                   Issue Title
+                  {filter === 'issue_title' && <span className="ml-auto text-xs">✓</span>}
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onSelect={() => {setFilter("state"); setPlaceholder("Search issues by state...")}}
-                  className={`cursor-pointer`}
+                  className={`cursor-pointer ${filter === 'state' ? 'bg-accent' : ''}`}
                 >
                   State
+                  {filter === 'state' && <span className="ml-auto text-xs">✓</span>}
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
                   onSelect={() => {setFilter("city"); setPlaceholder("Search issues by city...")}}
-                  className={`cursor-pointer`}
+                  className={`cursor-pointer ${filter === 'city' ? 'bg-accent' : ''}`}
                 >
                   City
+                  {filter === 'city' && <span className="ml-auto text-xs">✓</span>}
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onSelect={() => {setFilter("issue_status"); setPlaceholder("Search by status (pending, in-progress, resolved)...")}}
+                  className={`cursor-pointer ${filter === 'issue_status' ? 'bg-accent' : ''}`}
+                >
+                  Status
+                  {filter === 'issue_status' && <span className="ml-auto text-xs">✓</span>}
                 </DropdownMenuItem>
 
                 {/* <DropdownMenuItem
@@ -237,6 +339,26 @@ export default function CitizenPortal() {
             </DropdownMenu>
             </div>
               
+            {/* Search results info */}
+            {hasSearched && (
+              <div className="w-[85%] text-center py-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {issues.length > 0 
+                    ? `Found ${issues.length} issue${issues.length !== 1 ? 's' : ''} for "${query}"`
+                    : `No issues found for "${query}". Try a different search term or filter.`
+                  }
+                </p>
+                {issues.length === 0 && (
+                  <Button 
+                    variant="link" 
+                    onClick={handleClearSearch}
+                    className="mt-2"
+                  >
+                    View all issues
+                  </Button>
+                )}
+              </div>
+            )}
 
             {issues.map((issue) => (
               <Issue 
@@ -251,6 +373,8 @@ export default function CitizenPortal() {
               downvotes={issue.downvotes}
               id={issue.id}
               dp={issue.dp}
+              city={issue.city}
+              state_name={issue.state_name}
 
               key={issue.id} />
                 
