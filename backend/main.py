@@ -26,7 +26,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 COUNTRY_STATE_API_KEY = ""
-PROD_ENV = os.getenv("PROD_ENV", "False").lower() == "true"
+PROD_ENV = True
 
 # allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
 # origin_list = [origin.strip() for origin in allowed_origins.split(",") if origin.strip()]
