@@ -25,6 +25,14 @@ from datetime import datetime, timedelta, timezone
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
+def truncate_password_for_bcrypt(password: str) -> str:
+    """
+    Truncate password to 72 bytes for bcrypt compatibility.
+    Bcrypt has a limitation of 72 bytes for passwords.
+    """
+    password_bytes = password.encode('utf-8')[:72]
+    return password_bytes.decode('utf-8', errors='ignore')
+
 COUNTRY_STATE_API_KEY = ""
 PROD_ENV = True
 
@@ -33,14 +41,47 @@ PROD_ENV = True
 
 app = FastAPI()
 
+# Add preflight CORS handler
+@app.options("/{full_path:path}")
+async def options_handler():
+    return Response(
+        content="",
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
+
+# Configure CORS for production and development
+allowed_origins = [
+    "http://localhost:3000",  # development frontend
+    "https://janyachika.vercel.app",  # production frontend
+    "https://*.vercel.app",  # any vercel app
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://janyachika.vercel.app"  # production frontend
-    ], 
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Accept-Language",
+        "Content-Language",
+        "Content-Type",
+        "Authorization",
+        "Cookie",
+        "Set-Cookie",
+        "X-Requested-With",
+        "X-CSRFToken",
+        "Origin",
+        "Referer",
+        "User-Agent"
+    ],
+    expose_headers=["Set-Cookie"],
+    max_age=600,
 )
 
 
@@ -52,9 +93,11 @@ def login(user: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid information")
 
     db_user = result.data[0]
-    print(user.passwrd)
-    print(db_user['pass'])
-    if not db_user.get("pass") or not pwd_context.verify(user.passwrd, db_user["pass"]):
+    
+    # Truncate password for bcrypt compatibility
+    password_truncated = truncate_password_for_bcrypt(user.passwrd)
+    
+    if not db_user.get("pass") or not pwd_context.verify(password_truncated, db_user["pass"]):
         raise HTTPException(status_code=401, detail="Invalid information")
     
     if db_user.get("role") != user.role:
@@ -200,7 +243,11 @@ def register(user: UserCreate):
         )
 
     print(user)
-    hashed_pass = pwd_context.hash(user.passwrd)
+    
+    # Truncate password for bcrypt compatibility
+    password_truncated = truncate_password_for_bcrypt(user.passwrd)
+    
+    hashed_pass = pwd_context.hash(password_truncated)
 
     new_user_data = {
         "email": user.email,
@@ -380,7 +427,10 @@ def reset_password(request: ResetPasswordRequest):
                 raise HTTPException(status_code=400, detail="OTP verification expired")
         
         
-        hashed_password = pwd_context.hash(request.new_password)
+        # Truncate password for bcrypt compatibility
+        password_truncated = truncate_password_for_bcrypt(request.new_password)
+        
+        hashed_password = pwd_context.hash(password_truncated)
         result = supabase.table("users").update({"pass": hashed_password}).eq("email", request.email).execute()
         
         if not result.data:
