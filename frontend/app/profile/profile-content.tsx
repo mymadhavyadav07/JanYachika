@@ -50,7 +50,7 @@ export default function ProfileContent({ profile, loading, handleChange }: { pro
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                <Input id="email" type="email" onChange={handleChange} value={profile?.email} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>

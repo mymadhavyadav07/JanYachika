@@ -13,6 +13,9 @@ import { redirect, useRouter } from "next/navigation";
 import SplitText from "@/components/blocks/TextAnimations/SplitText/SplitText";
 import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 import niti from "@/public/Niti.jpeg"
+import imran from "@/public/imran.png";
+import tanishk from "@/public/tanishk.png";
+
 
 type Issue = {
   id: number;
@@ -153,22 +156,22 @@ export default function CitizenPortal() {
       url: "https://www.linkedin.com/in/niti-mishra-16b34a326"
     },
     {
-      image: "https://i.pravatar.cc/300?img=2",
-      title: "Mike Chen",
-      subtitle: "Backend Engineer",
-      handle: "@mikechen",
+      image: `${imran.src}`,
+      title: "Mohammad Imran",
+      subtitle: "Backend Developer",
+      handle: "@mohammad-imran",
       borderColor: "#10B981",
       gradient: "linear-gradient(180deg, #10B981, #000)",
-      url: "https://linkedin.com/in/mikechen"
+      url: "https://www.linkedin.com/in/mohammad-imran-361721325?trk=contact-info"
     },
     {
-      image: "https://i.pravatar.cc/300?img=2",
-      title: "Mike Chen",
-      subtitle: "Backend Engineer",
-      handle: "@mikechen",
+      image: `${tanishk.src}`,
+      title: "Tanishk Kushwaha",
+      subtitle: "Frontend Engineer",
+      handle: "@droid85real",
       borderColor: "#10B981",
       gradient: "linear-gradient(180deg, #10B981, #000)",
-      url: "https://linkedin.com/in/mikechen"
+      url: "https://github.com/droid85real"
     },
     {
       image: "https://i.pravatar.cc/300?img=2",

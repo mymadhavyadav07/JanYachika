@@ -14,6 +14,13 @@ import { useAuth } from "@/hooks/use-auth";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
+interface SocialItem {
+  name: string;
+  url: string;
+  icon: (props: IconProps) => JSX.Element;
+  onClick?: () => void;
+}
+
 
 interface FooterProps extends React.HTMLAttributes<HTMLElement> {
     className?: string;
@@ -94,7 +101,7 @@ export default function Footer({className}: FooterProps) {
         };
 
     return (
-        <footer className={`fixed mb-2 bottom-0 w-full flex justify-center mt-5 ${className ?? ""}`}>
+        <footer className={`fixed mb-2 bottom-0 w-full flex justify-center mt-5 z-[9999] ${className ?? ""}`}>
       <TooltipProvider>
         <Dock direction="middle">
             {DATA.navbar.map((item) => (
@@ -123,16 +130,32 @@ export default function Footer({className}: FooterProps) {
               <DockIcon key={name}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link
-                      href={social.url}
-                      aria-label={social.name}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "size-12 rounded-full ",
-                      )}
-                    >
-                      <social.icon className="size-4" />
-                    </Link>
+                    {social.onClick ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          social.onClick();
+                        }}
+                        aria-label={social.name}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "size-12 rounded-full",
+                        )}
+                      >
+                        <social.icon className="size-4" />
+                      </button>
+                    ) : (
+                      <Link
+                        href={social.url}
+                        aria-label={social.name}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "size-12 rounded-full ",
+                        )}
+                      >
+                        <social.icon className="size-4" />
+                      </Link>
+                    )}
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{social.name}</p>

@@ -26,7 +26,8 @@ interface HeaderProps {
 
 export default function Header({ className }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(true); // Set to true immediately
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Track auth loading separately
   const [ role, setRole ] = useState("");
   const [ authenticated, setAuthenticated ] = useState(false);
   const router = useRouter();
@@ -34,30 +35,44 @@ export default function Header({ className }: HeaderProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Set a timeout for the API call
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+        }, 5000); // 5 second timeout
+
         const res = await fetch(`${apiBaseUrl}/me`, {
           credentials: 'include',
+          signal: controller.signal,
         });
 
+        clearTimeout(timeoutId);
+
         if (res.status === 401) {
-          console.log("Unauthorized. Redirecting to login...");
+          console.log("Unauthorized. User not logged in.");
+          setAuthenticated(false);
+          setIsAuthLoading(false);
           return;
-         
         }
 
         if (!res.ok) {
           throw new Error(`Unexpected error: ${res.status}`);
         }
 
-        
         const data = await res.json();
         setRole(data.message.role.toString());
         setAuthenticated(true);
-        console.log("ROLEE", role)
-        setIsMounted(true);
+        console.log("ROLE:", data.message.role.toString());
+        setIsAuthLoading(false);
 
       } catch (err) {
-        console.log("Failed to fetch data", err);
-        setIsMounted(true);
+        if (err.name === 'AbortError') {
+          console.log("Auth check timed out, showing login buttons");
+        } else {
+          console.log("Failed to fetch auth data:", err);
+        }
+        setAuthenticated(false);
+        setIsAuthLoading(false);
         return;
       }
     };
@@ -102,13 +117,7 @@ export default function Header({ className }: HeaderProps) {
             <NavBody>
                 <NavbarLogo />
                 <NavItems items={navItems} />
-                {!isMounted ? (
-                  // Loading skeleton
-                  <div className="flex items-center gap-4">
-                    <div className="h-9 w-16 bg-gray-200 animate-pulse rounded"></div>
-                    <div className="h-9 w-20 bg-gray-200 animate-pulse rounded"></div>
-                  </div>
-                ) : authenticated ? (
+                {authenticated ? (
                   // Authenticated - show dashboard button
                   <div className="flex items-center gap-4">
                     <NavbarButton 
@@ -121,10 +130,22 @@ export default function Header({ className }: HeaderProps) {
                     </NavbarButton>
                   </div>
                 ) : (
-                  // Non-authenticated buttons
+                  // Non-authenticated buttons (show immediately, even while loading)
                   <div className="flex items-center gap-4">
-                    <NavbarButton variant="secondary" href="/login">Login</NavbarButton>
-                    <NavbarButton variant="primary" href="/register">Sign Up</NavbarButton>
+                    <NavbarButton 
+                      variant="secondary" 
+                      href="/login"
+                      className={isAuthLoading ? "opacity-75" : ""}
+                    >
+                      Login
+                    </NavbarButton>
+                    <NavbarButton 
+                      variant="primary" 
+                      href="/register"
+                      className={isAuthLoading ? "opacity-75" : ""}
+                    >
+                      Sign Up
+                    </NavbarButton>
                   </div>
                 )}
             </NavBody>
@@ -153,7 +174,7 @@ export default function Header({ className }: HeaderProps) {
                     </a>
                 ))}
                 <div className="flex w-full flex-col gap-4">
-                  {authenticated && role ? (
+                  {authenticated ? (
                     // Authenticated mobile menu
                     <>
                       <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
@@ -169,19 +190,19 @@ export default function Header({ className }: HeaderProps) {
                       </NavbarButton>
                     </>
                   ) : (
-                    // Non-authenticated mobile menu
+                    // Non-authenticated mobile menu (show immediately)
                     <>
                       <NavbarButton
                         href="/login"
                         variant="primary"
-                        className="w-full"
+                        className={`w-full ${isAuthLoading ? "opacity-75" : ""}`}
                       >
                         Login
                       </NavbarButton>
                       <NavbarButton
                         href="/register"
                         variant="primary"
-                        className="w-full"
+                        className={`w-full ${isAuthLoading ? "opacity-75" : ""}`}
                       >
                         Sign Up
                       </NavbarButton>
