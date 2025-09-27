@@ -1,5 +1,6 @@
 
 
+import React from "react";
 import { TooltipProvider, TooltipContent, TooltipTrigger, Tooltip } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -13,13 +14,6 @@ import { useAuth } from "@/hooks/use-auth";
 
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
-
-interface SocialItem {
-  name: string;
-  url: string;
-  icon: (props: IconProps) => JSX.Element;
-  onClick?: () => void;
-}
 
 
 interface FooterProps extends React.HTMLAttributes<HTMLElement> {
@@ -130,32 +124,16 @@ export default function Footer({className}: FooterProps) {
               <DockIcon key={name}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    {social.onClick ? (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          social.onClick();
-                        }}
-                        aria-label={social.name}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon" }),
-                          "size-12 rounded-full",
-                        )}
-                      >
-                        <social.icon className="size-4" />
-                      </button>
-                    ) : (
-                      <Link
-                        href={social.url}
-                        aria-label={social.name}
-                        className={cn(
-                          buttonVariants({ variant: "ghost", size: "icon" }),
-                          "size-12 rounded-full ",
-                        )}
-                      >
-                        <social.icon className="size-4" />
-                      </Link>
-                    )}
+                    <Link
+                      href={social.url}
+                      aria-label={social.name}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "icon" }),
+                        "size-12 rounded-full ",
+                      )}
+                    >
+                      <social.icon className="size-4" />
+                    </Link>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{social.name}</p>
