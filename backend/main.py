@@ -41,7 +41,6 @@ PROD_ENV = os.getenv("PROD_ENV", False).lower() == "true"
 
 app = FastAPI()
 
-# Add preflight CORS handler
 @app.options("/{full_path:path}")
 async def options_handler():
     return Response(
@@ -54,11 +53,9 @@ async def options_handler():
         }
     )
 
-# Configure CORS for production and development
 allowed_origins = [
-    "http://localhost:3000",  # development frontend
-    "https://janyachika.vercel.app",  # production frontend
-    "https://*.vercel.app",  # any vercel app
+    "http://localhost:3000",
+    "https://janyachika.vercel.app" 
 ]
 
 app.add_middleware(
@@ -93,8 +90,6 @@ def login(user: UserLogin, response: Response):
         raise HTTPException(status_code=401, detail="Invalid information")
 
     db_user = result.data[0]
-    
-    # Truncate password for bcrypt compatibility
     password_truncated = truncate_password_for_bcrypt(user.passwrd)
     
     if not db_user.get("pass") or not pwd_context.verify(password_truncated, db_user["pass"]):
