@@ -55,7 +55,8 @@ export function LoginForm({
       try {
         const res = await fetch(`${apiBaseUrl}/fetch_states_and_dept`); 
         const data = await res.json();
-
+        console.log("States:", data);
+        
         setStates(data.states.data);
         setDepts(data.depts.data);
 
