@@ -15,6 +15,12 @@ import { useAuth } from "@/hooks/use-auth";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
+interface SocialItem {
+  name: string;
+  url: string;
+  icon: React.ComponentType<IconProps>;
+  onClick?: () => void;
+}
 
 interface FooterProps extends React.HTMLAttributes<HTMLElement> {
     className?: string;
@@ -36,7 +42,13 @@ export default function Footer({className}: FooterProps) {
     const { logout } = useAuth();
 
     const handleLogout = async () => {
-        await logout();
+        console.log('Logout button clicked in dock');
+        try {
+            await logout();
+            console.log('Logout successful');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     };
 
     const Icons = {
@@ -73,23 +85,23 @@ export default function Footer({className}: FooterProps) {
                 name: "Edit Profile",
                 url: "/profile",
                 icon: Icons.profile,
-            },
+            } as SocialItem,
             issue: {
                 name: "Raise Issue",
                 url: "/report-issue",
                 icon: Icons.issue,
-            },
+            } as SocialItem,
             heatmap: {
                 name: "View Heatmap",
                 url: "/map-view",
                 icon: Icons.heatmap,
-            },
+            } as SocialItem,
             logout: {
                 name: "Logout",
                 url: "#",
                 icon: Icons.logout,
                 onClick: handleLogout,
-            },
+            } as SocialItem,
             },
         },
         };
@@ -124,16 +136,31 @@ export default function Footer({className}: FooterProps) {
               <DockIcon key={name}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link
-                      href={social.url}
-                      aria-label={social.name}
-                      className={cn(
-                        buttonVariants({ variant: "ghost", size: "icon" }),
-                        "size-12 rounded-full ",
-                      )}
-                    >
-                      <social.icon className="size-4" />
-                    </Link>
+                    {social.onClick ? (
+                      // For items with onClick handler (like logout)
+                      <button
+                        onClick={social.onClick}
+                        aria-label={social.name}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "size-12 rounded-full",
+                        )}
+                      >
+                        <social.icon className="size-4" />
+                      </button>
+                    ) : (
+                      // For regular navigation items
+                      <Link
+                        href={social.url}
+                        aria-label={social.name}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "size-12 rounded-full",
+                        )}
+                      >
+                        <social.icon className="size-4" />
+                      </Link>
+                    )}
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{social.name}</p>
