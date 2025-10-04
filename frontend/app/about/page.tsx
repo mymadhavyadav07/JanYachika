@@ -15,7 +15,7 @@ import ShinyText from "@/components/blocks/TextAnimations/ShinyText/ShinyText";
 import niti from "@/public/Niti.jpeg"
 import imran from "@/public/imran.png";
 import tanishk from "@/public/tanishk.png";
-
+import kishan from "@/public/kishan.jpeg"
 
 type Issue = {
   id: number;
@@ -174,22 +174,22 @@ export default function CitizenPortal() {
       url: "https://github.com/droid85real"
     },
     {
-      image: "https://i.pravatar.cc/300?img=2",
-      title: "Mike Chen",
-      subtitle: "Backend Engineer",
-      handle: "@mikechen",
+      image: `${kishan.src}`,
+      title: "Kishan Kumar",
+      subtitle: "Database Admin",
+      handle: "@kishankr",
       borderColor: "#10B981",
       gradient: "linear-gradient(180deg, #10B981, #000)",
-      url: "https://linkedin.com/in/mikechen"
+      url: "http://www.linkedin.com/in/kishan-undefined-175517277"
     },
     {
-      image: "https://i.pravatar.cc/300?img=2",
-      title: "Mike Chen",
-      subtitle: "Backend Engineer",
-      handle: "@mikechen",
+      image: "https://avatar.iran.liara.run/public/13",
+      title: "Hemant Pandey",
+      subtitle: "Backend Developer",
+      handle: "@hemant-pandey",
       borderColor: "#10B981",
       gradient: "linear-gradient(180deg, #10B981, #000)",
-      url: "https://linkedin.com/in/mikechen"
+      url: "https://www.linkedin.com/in/hemant-pandey2292/"
     }
   ];
 
