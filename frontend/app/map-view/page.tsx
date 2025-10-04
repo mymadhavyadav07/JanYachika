@@ -41,7 +41,7 @@ export default function MapView() {
         setLoading(true);
         setError(null);
         
-        // First check authentication
+ 
         const authRes = await fetch(`${apiBaseUrl}/me`, {
           credentials: 'include',
         });
@@ -56,7 +56,6 @@ export default function MapView() {
           throw new Error(`Auth error: ${authRes.status}`);
         }
 
-        // User is authenticated, now fetch map data
         const mapRes = await fetch(`${apiBaseUrl}/map-view`, {
           credentials: 'include',
         });
@@ -76,21 +75,19 @@ export default function MapView() {
         console.error("Failed to fetch data:", err);
         setError(err instanceof Error ? err.message : "Failed to load map data");
         setLoading(false);
-        
-        // Only redirect to login if it's an auth error
-        if (err instanceof Error && err.message.includes('401')) {
-          redirect("/login");
-        }
+        redirect("/login")
+
+        // if (err instanceof Error && err.message.includes('401')) {
+        //   redirect("/login");
+        // }
       }
     };
 
     fetchData();
   }, [router]);
 
-  // Handle city search
   const handleCitySelect = (city: City) => {
     if (mapInstance) {
-      // Pan to the selected city with appropriate zoom level
       mapInstance.setView([city.latitude, city.longitude], 12, {
         animate: true,
         duration: 1.5
@@ -98,13 +95,12 @@ export default function MapView() {
     }
   };
 
-  // Handle map ready callback
+
   const handleMapReady = (map: any) => {
     setMapInstance(map);
   };
 
 
-  // Loading state
   if (loading) {
     return (
       <div className="relative flex flex-col mt-16">
@@ -131,7 +127,7 @@ export default function MapView() {
     );
   }
 
-  // Error state
+
   if (error) {
     return (
       <div className="relative flex flex-col mt-16">
@@ -164,7 +160,6 @@ export default function MapView() {
     );
   }
 
-  // No data state
   if (!mapData || !mapData.coordinates || mapData.coordinates.length === 0) {
     return (
       <div className="relative flex flex-col mt-16">
@@ -191,19 +186,19 @@ export default function MapView() {
     );
   }
 
-  // Determine map center and zoom with better defaults for heatmap visibility
-  const mapCenter: [number, number] = mapData.metadata.center || [20.5937, 78.9629]; // Default to center of India
+
+  const mapCenter: [number, number] = mapData.metadata.center || [20.5937, 78.9629]; 
   
-  // Improved zoom logic for better heatmap visibility
+
   let mapZoom: number;
   if (mapData.coordinates.length > 50) {
-    mapZoom = 5;  // Very wide view for many points (country level)
+    mapZoom = 5; 
   } else if (mapData.coordinates.length > 20) {
-    mapZoom = 6;  // Wide view for moderate points (state level)
+    mapZoom = 6; 
   } else if (mapData.coordinates.length > 5) {
-    mapZoom = 8;  // Medium view for few points (regional level)
+    mapZoom = 8; 
   } else {
-    mapZoom = 10; // Closer view for very few points (city level)
+    mapZoom = 10;
   }
 
   return (
