@@ -86,12 +86,12 @@ export default function Header({ className }: HeaderProps) {
     
     switch (role.toLowerCase()) {
       case "admin":
-        return "/admin";
+        return "https://www.linkedin.com/in/mymadhavyadav07/";
       case "officer":
-        return "/officer";
+        return "https://www.linkedin.com/in/mymadhavyadav07/";
       case "citizen":
       default:
-        return "/citizen";
+        return "https://www.linkedin.com/in/mymadhavyadav07/";
     }
   };
 
@@ -100,12 +100,12 @@ export default function Header({ className }: HeaderProps) {
     
     switch (role.toLowerCase()) {
       case "admin":
-        return "Admin Dashboard";
+        return "Contact Me";
       case "officer":
-        return "Officer Dashboard";
+        return "Contact Me";
       case "citizen":
       default:
-        return "Citizen Dashboard";
+        return "Contact Me";
     }
   };
 

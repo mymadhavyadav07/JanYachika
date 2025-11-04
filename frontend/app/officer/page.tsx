@@ -35,6 +35,10 @@ export default function Page() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    redirect("/citizen");
+  })
+  
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(`${apiBaseUrl}/me`, {

@@ -35,7 +35,11 @@ export function Header(){
 export default function Page() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-
+  
+  useEffect(() => {
+    redirect("/citizen");
+  })
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
